@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="en">
+ <!--<![endif]-->
+ <!-- BEGIN HEAD -->
+ <head> 
+  <meta charset="utf-8"> 
+  <!-- 博客标题 --> 
+  <title>Elasticsearch 之 不停服务重建索引 - Sunny个人博客</title> 
+  <meta http-equiv="X-UA-Compatible" content="IE=edge"> 
+  <meta name="keywords" content="当我们在使用Es做为我们应用的全文检索服务器的时候，文档结构避免不了会发生变化，比如增加字段，而且增加的字段需要进行分词时，再比如原来文档结构中的字段类型发生改变了，假设原来的字段类型是String,"> 
+  <meta name="description" content="当我们在使用Es做为我们应用的全文检索服务器的时候，文档结构避免不了会发生变化，比如增加字段，而且增加的字段需要进行分词时，再比如原来文档结构中的字段类型发生改变了，假设原来的字段类型是String,"> 
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+  <meta content="width=device-width, initial-scale=1" name="viewport"> 
+  <meta content="" name="author"> 
+  <!-- javascript初始化区域 --> 
+  <link href="http://css.soaer.com/global/plugins/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css"> 
+  <link href="http://css.soaer.com/global/css/index.components.min.css" rel="stylesheet" id="style_components" type="text/css"> 
+  <link href="http://css.soaer.com/layouts/layout4/css/layout.min.css" rel="stylesheet" type="text/css"> 
+  <link href="http://css.soaer.com/layouts/layout4/css/themes/default.min.css" rel="stylesheet" type="text/css" id="style_color"> 
+  <link href="http://css.soaer.com/layouts/layout4/css/md.css" rel="stylesheet" type="text/css"> 
+  <link href="http://css.soaer.com/apps/css/todo-2.min.css" rel="stylesheet" type="text/css"> 
+  <link href="http://css.soaer.com/pages/css/profile.min.css" rel="stylesheet" type="text/css"> 
+  <script type="text/javascript">
+    var blogKey="ef590416a81c4e7f8cbff1bd56d2baca" 
+    var userName="Sunny" 
+    var blogId="39" 
+</script>
+ </head> 
+ <body class="page-container-bg-solid page-header-fixed page-sidebar-closed-hide-logo"> 
+  <!-- BEGIN HEADER --> 
+  <div class="page-header navbar navbar-fixed-top"> 
+   <!-- BEGIN HEADER INNER --> 
+   <div class="page-header-inner "> 
+    <div class="page-top"> 
+     <div class="top-menu"> 
+      <ul class="nav navbar-nav pull-right"> 
+       <!-- <li class="separator hide"></li> --> 
+       <li class="dropdown dropdown-user dropdown-dark"><a href="http://www.soaer.com" class="dropdown-toggle" data-hover="dropdown" data-close-others="true"> <span class="username username-hide-on-mobile">首页</span> <img alt="" class="img-circle"> </a></li> 
+       <li class="dropdown dropdown-user dropdown-dark"><a href="http://tool.soaer.com" class="dropdown-toggle" data-hover="dropdown" data-close-others="true"> <span class="username username-hide-on-mobile">常用工具</span> <img alt="" class="img-circle"> </a></li> 
+       <li class="dropdown dropdown-user dropdown-dark"><a href="http://blog.soaer.com" class="dropdown-toggle" data-hover="dropdown" data-close-others="true"> <span class="username username-hide-on-mobile">个人博客</span> <img alt="" class="img-circle"> </a></li> 
+      </ul> 
+     </div> 
+     <!-- END TOP NAVIGATION MENU --> 
+    </div> 
+    <!-- END PAGE TOP --> 
+   </div> 
+   <!-- END HEADER INNER --> 
+  </div> 
+  <!-- END HEADER --> 
+  <!-- BEGIN HEADER & CONTENT DIVIDER --> 
+  <div class="clearfix"></div> 
+  <!-- END HEADER & CONTENT DIVIDER --> 
+  <!-- BEGIN CONTAINER --> 
+  <div class="page-container"> 
+   <!-- BEGIN SIDEBAR --> 
+   <div class="page-sidebar-wrapper"> 
+    <!-- BEGIN SIDEBAR --> 
+    <!-- DOC: Set data-auto-scroll="false" to disable the sidebar from auto scrolling/focusing --> 
+    <!-- DOC: Change data-auto-speed="200" to adjust the sub menu slide up/down speed --> 
+    <div class="page-sidebar navbar-collapse collapse"> 
+     <ul class="page-sidebar-menu   " data-keep-expanded="false" data-auto-scroll="true" data-slide-speed="200"> 
+      <div class="profile-sidebar"> 
+       <!-- PORTLET MAIN --> 
+       <div class="portlet light profile-sidebar-portlet bordered"> 
+        <!-- SIDEBAR USERPIC --> 
+        <div class="profile-userpic"> 
+         <img src="http://img.soaer.com/pages/media/profile/sunny.jpg" class="img-responsive" alt=""> 
+        </div> 
+        <!-- 博客作者名称 --> 
+        <div class="profile-usertitle"> 
+         <div class="profile-usertitle-name">
+          Sunny
+         </div> 
+        </div> 
+       </div> 
+       <div id="ad"> 
+        <!-- <img  width="100%" src="http://f12.baidu.com/it/u=292560263,2120845313&fm=76"> --> 
+       </div> 
+       <br> 
+       <div class="portlet light bordered"> 
+        <div> 
+         <!-- 阅读次数 --> 
+         <div class="margin-top-10 profile-desc-link" id="blogReadNum"></div> 
+         <!-- 创建时间 --> 
+         <div class="margin-top-10 profile-desc-link" id="blogCreateDate">
+          创建日期：2018年1月12日
+         </div> 
+        </div> 
+        <br> 
+        <div id="lastBlogList"> 
+         <h4 class="profile-desc-title">最近发表的文章</h4> 
+         <!-- <span class="profile-desc-text"> Lorem ipsum dolor sit amet diam nonummy nibh dolore. </span> --> 
+         <!-- 最新发表的博客列表 --> 
+        </div> 
+       </div> 
+       <!-- END PORTLET MAIN --> 
+      </div> 
+     </ul> 
+     <!-- END SIDEBAR MENU --> 
+    </div> 
+    <!-- END SIDEBAR --> 
+   </div> 
+   <!-- END SIDEBAR --> 
+   <!-- BEGIN CONTENT --> 
+   <!-- END QUICK SIDEBAR --> 
+   <div class="page-content-wrapper"> 
+    <div class="page-content"> 
+     <div class="page-head"> 
+      <!-- BEGIN PAGE TITLE --> 
+      <!-- 博客标题 --> 
+      <div id="page-title"> 
+       <h1>Elasticsearch 之 不停服务重建索引</h1> 
+      </div> 
+      <!-- END PAGE TITLE --> 
+      <!-- BEGIN PAGE TOOLBAR --> 
+      <!-- END PAGE TOOLBAR --> 
+     </div> 
+     <br> 
+     <!-- 博客标签列表 --> 
+     <div class="noteAd">
+      <a href="javascript:;" class="btn btn-circle red disabled">原创</a>
+      <a href="javascript:;" class="btn btn-circle green disabled">标签</a>
+      <a href="javascript:;" class="btn btn-circle green">Elasticsearch</a>
+      <a href="javascript:;" class="btn btn-circle green">重建索引</a>
+      <a href="javascript:;" class="btn btn-circle green"> es</a>
+     </div> 
+     <h2>问题描述</h2> 
+     <p>当我们在使用Es做为我们应用的全文检索服务器的时候，文档结构避免不了会发生变化，比如增加字段，而且增加的字段需要进行分词时，再比如原来文档结构中的字段类型发生改变了，假设原来的字段类型是String, 而修改后的字段类型是Object，Es是不支持这种直接修改字段类型的。我们能做的可能只有进行重新索引，当然关系型数据库也不支持这种类型字段改变的情况。</p> 
+     <p>Elasticsearch 的各种语言的API在此不做介绍了（包括rest api），很简单.</p> 
+     <p>也许现在有人提问当进行重新的索引的时候程序难道不用改变么？</p> 
+     <p>当然不用。相信用过Spring的同学都知道，spring配置中有一个叫“别名的东西“</p> 
+     <p>比如：</p> 
+     <pre lang="undefined">
+&lt;authentication-manager alias="authenticationManager"&gt;
+&lt;authentication-provider user-service-ref="sysUserDetailsService"/&gt;
+&lt;/authentication-manager&gt;
+</pre> 
+     <p>幸运的是Es也有这个“别名“机制 索引当我们在第一次建立一个索引的时候最好还是创建一个别名。 避免以后改变的时候要不改变程序，要不删除原来的数据。很麻烦</p> 
+     <p>好了，废话不多说了直接上代码：</p> 
+     <h2>创建别名</h2> 
+     <pre lang="undefined">
+CreateIndexResponse response = client.admin().indices().prepareCreate(indexName).setAliases(aliase).setSettings(builder).execute().actionGet();
+</pre> 
+     <p>其中setAliases就是设置创建的这个索引的别名，访问哪一个都一样，包括CRUD操作。</p> 
+     <p>比如：</p> 
+     <p>索引名称是：china_address1 索引别名是：address 访问那一个都是一样的。</p> 
+     <h2>重新索引数据</h2> 
+     <pre lang="undefined">
+SearchResponse scrollResp = client
+        .prepareSearch(indexName)
+        .setSearchType(SearchType.SCAN)
+        .setScroll(new TimeValue(60000))
+        .setSize(100)
+        .execute()
+        .actionGet();
+    while (true) {
+      SearchHit[] arrayScoll = scrollResp.getHits().getHits();
+      //处理查询出来的数据放入到新的索引里面
+      createIndexBuilk(arrayScoll, newIndexName, arrayMapping);
+      scrollResp = client.prepareSearchScroll(scrollResp.getScrollId()).setScroll(new TimeValue(60000)).execute().actionGet();
+      if (scrollResp.getHits().getHits().length == 0) {
+        break;
+      }
+    }
+</pre> 
+     <p>然后再删除旧索引的别名address，再在新索引中加入别名address.这样应用就可以不用重新启动也不需要改就可以直接访问服务了。但是还有会有一个瞬间的增量问题。</p>  
+     <!-- --------------------MarkDown文件去也--------------------------- --> 
+     <!-- --------------------------------------------------------- --> 
+     <br> 
+     <div class="note note-info"> 
+      <div align="left">
+       您也可以看看这两篇文章:&nbsp;&nbsp;
+       <a href="http://blog.soaer.com/1/d64a53028765441587bbcac432fd834f.html" id="recommended1">dnsmasq搭建DNS服务器</a>&nbsp;&nbsp;
+       <a href="http://blog.soaer.com/1/cce3fb9df2cb4333a2e4c2a99742a589.html" id="recommended2">docker部署Elasticsearch集群</a>
+      </div> 
+     </div> 
+     <!-- 评论区 --> 
+     <div class="row"> 
+      <div class="col-md-12"> 
+       <!-- BEGIN TODO SIDEBAR --> 
+       <div class="todo-ui"> 
+        <!-- END TODO SIDEBAR --> 
+        <!-- BEGIN TODO CONTENT --> 
+        <div class="todo-content"> 
+         <div class="portlet light bordered"> 
+          <!-- PROJECT HEAD --> 
+          <!-- end PROJECT HEAD --> 
+          <div class="portlet-body"> 
+           <div class="row"> 
+            <div class="todo-tasklist-devider"></div> 
+            <div class="col-md-12 col-sm-8"> 
+             <form class="form-horizontal" id="addComments"> 
+              <!-- TASK HEAD --> 
+              <div class="form"> 
+               <div class="form-group"> 
+                <div class="col-md-8 col-sm-8"> 
+                 <div class="todo-taskbody-user"> 
+                  <img class="todo-userpic pull-left" src="http://img.soaer.com/pages/media/users/avatar6.jpg" width="50px" height="50px"> 
+                  <span class="todo-username pull-left" id="commentsName"></span> 
+                 </div> 
+                </div> 
+               </div> 
+               <!-- TASK DESC --> 
+               <div class="form-group"> 
+                <div class="col-md-12"> 
+                 <textarea class="form-control todo-taskbody-taskdesc" rows="8" placeholder="文明上网" name="content" id="commentsContent"></textarea> 
+                </div> 
+               </div> 
+               <div id="sendCommentsErrorMessage"></div> 
+               <div class="form-actions right todo-form-actions"> 
+                <input type="button" class="btn btn-circle btn-sm green" id="ac" value="提交"> 
+               </div> 
+              </div> 
+             </form> 
+             <form class="form-horizontal" id="sendEmail" style="display:none;"> 
+              <!-- TASK HEAD  style="display:none;" --> 
+              <div class="form"> 
+               <div class="form-group"> 
+                <div class="col-md-12"> 
+                 <textarea class="form-control todo-taskbody-taskdesc" rows="1" name="email" id="sendMailContent" placeholder="邮箱验证，请输入邮箱号"></textarea> 
+                </div> 
+               </div> 
+               <div class="form-actions right todo-form-actions"> 
+                <input type="button" class="btn btn-circle btn-sm green" id="sdm" value="发送"> 
+               </div> 
+              </div> 
+              <div id="sendEmailErrorMessage"></div> 
+             </form> 
+             <form class="form-horizontal" id="validationEmail" style="display:none;"> 
+              <!-- TASK HEAD  style="display:none;" --> 
+              <div class="form"> 
+               <div class="form-group"> 
+                <div class="col-md-12"> 
+                 <textarea class="form-control todo-taskbody-taskdesc" rows="3" name="cid" placeholder="请输入邮箱里面的内容，验证一次再次评论无需验证"></textarea> 
+                </div> 
+               </div> 
+               <div class="form-actions right todo-form-actions"> 
+                <input type="button" class="btn btn-circle btn-sm green" id="vm" value="验证"> 
+               </div> 
+               <div id="validationEmailErrorMessage"></div> 
+              </div> 
+             </form> 
+             <div class="tabbable-line"> 
+              <div class="tab-content"> 
+               <div class="tab-pane active" id="tab_1"> 
+                <!-- TASK COMMENTS --> 
+                <div class="form-group"> 
+                 <div class="col-md-12"> 
+                  <ul class="media-list" id="commentsList"> 
+                   <!-- 单个评论区 --> 
+                   <!-- 单个评论区结束 --> 
+                  </ul> 
+                 </div> 
+                </div> 
+               </div> 
+              </div> 
+             </div> 
+            </div> 
+           </div> 
+          </div> 
+         </div> 
+        </div> 
+        <!-- END TODO CONTENT --> 
+       </div> 
+      </div> 
+      <!-- END PAGE CONTENT--> 
+     </div> 
+    </div> 
+   </div> 
+  </div> 
+  <script src="http://js.soaer.com/global/plugins/jquery.min.js" type="text/javascript"></script> 
+  <script src="http://js.soaer.com/global/plugins/jquery-cookiebar/jquery.cookieBar.min.js" type="text/javascript"></script> 
+  <script src="http://js.soaer.com/global/plugins/bootstrap/js/bootstrap.min.js" type="text/javascript"></script> 
+  <script src="http://js.soaer.com/global/plugins/js.cookie.min.js" type="text/javascript"></script> 
+  <script src="http://js.soaer.com/global/plugins/jquery-slimscroll/jquery.slimscroll.min.js" type="text/javascript"></script> 
+  <script src="http://js.soaer.com/global/plugins/jquery.blockui.min.js" type="text/javascript"></script> 
+  <script src="http://js.soaer.com/global/plugins/bootstrap-switch/js/bootstrap-switch.min.js" type="text/javascript"></script> 
+  <script src="http://js.soaer.com/global/scripts/app.min.js" type="text/javascript"></script> 
+  <script src="http://js.soaer.com/layouts/layout4/scripts/layout.min.js" type="text/javascript"></script> 
+  <script src="http://js.soaer.com/global/plugins/jquery.base64.js" type="text/javascript"></script> 
+  <script src="http://js.soaer.com/layouts/global/scripts/quick-sidebar.min.js" type="text/javascript"></script> 
+  <script src="http://js.soaer.com/global/plugins/js.cookie.min.js" type="text/javascript"></script> 
+  <script src="http://js.soaer.com/layouts/global/scripts/quick-nav.min.js" type="text/javascript"></script> 
+  <script src="http://js.soaer.com/operate/blog.min.js" type="text/javascript"></script>   
+ </body>
+</html>

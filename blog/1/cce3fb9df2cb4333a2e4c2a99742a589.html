@@ -1,0 +1,402 @@
+<!doctype html>
+<html lang="en">
+ <!--<![endif]-->
+ <!-- BEGIN HEAD -->
+ <head> 
+  <meta charset="utf-8"> 
+  <!-- 博客标题 --> 
+  <title>docker部署Elasticsearch集群 - Sunny个人博客</title> 
+  <meta http-equiv="X-UA-Compatible" content="IE=edge"> 
+  <meta name="keywords" content="安装docker 查看官方文档：针对每个系统版本进行安装。不同子网的container之间是默认隔离的，即使他们在同一台机器上面也不能ping通，不同物理机之间的容器也是默认隔离的。所以在weave启"> 
+  <meta name="description" content="安装docker 查看官方文档：针对每个系统版本进行安装。不同子网的container之间是默认隔离的，即使他们在同一台机器上面也不能ping通，不同物理机之间的容器也是默认隔离的。所以在weave启"> 
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+  <meta content="width=device-width, initial-scale=1" name="viewport"> 
+  <meta content="" name="author"> 
+  <!-- javascript初始化区域 --> 
+  <link href="http://css.soaer.com/global/plugins/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css"> 
+  <link href="http://css.soaer.com/global/css/index.components.min.css" rel="stylesheet" id="style_components" type="text/css"> 
+  <link href="http://css.soaer.com/layouts/layout4/css/layout.min.css" rel="stylesheet" type="text/css"> 
+  <link href="http://css.soaer.com/layouts/layout4/css/themes/default.min.css" rel="stylesheet" type="text/css" id="style_color"> 
+  <link href="http://css.soaer.com/layouts/layout4/css/md.css" rel="stylesheet" type="text/css"> 
+  <link href="http://css.soaer.com/apps/css/todo-2.min.css" rel="stylesheet" type="text/css"> 
+  <link href="http://css.soaer.com/pages/css/profile.min.css" rel="stylesheet" type="text/css"> 
+  <script type="text/javascript">
+var blogKey="cce3fb9df2cb4333a2e4c2a99742a589" 
+var userName="Sunny" 
+var blogId="37" 
+
+</script>
+ </head> 
+ <body class="page-container-bg-solid page-header-fixed page-sidebar-closed-hide-logo"> 
+  <!-- BEGIN HEADER --> 
+  <div class="page-header navbar navbar-fixed-top"> 
+   <!-- BEGIN HEADER INNER --> 
+   <div class="page-header-inner "> 
+    <div class="page-top"> 
+     <div class="top-menu"> 
+      <ul class="nav navbar-nav pull-right"> 
+       <!-- <li class="separator hide"></li> --> 
+       <li class="dropdown dropdown-user dropdown-dark"><a href="http://www.soaer.com" class="dropdown-toggle" data-hover="dropdown" data-close-others="true"> <span class="username username-hide-on-mobile">首页</span> <img alt="" class="img-circle"> </a></li> 
+       <li class="dropdown dropdown-user dropdown-dark"><a href="http://tool.soaer.com" class="dropdown-toggle" data-hover="dropdown" data-close-others="true"> <span class="username username-hide-on-mobile">常用工具</span> <img alt="" class="img-circle"> </a></li> 
+       <li class="dropdown dropdown-user dropdown-dark"><a href="http://blog.soaer.com" class="dropdown-toggle" data-hover="dropdown" data-close-others="true"> <span class="username username-hide-on-mobile">个人博客</span> <img alt="" class="img-circle"> </a></li> 
+      </ul> 
+     </div> 
+     <!-- END TOP NAVIGATION MENU --> 
+    </div> 
+    <!-- END PAGE TOP --> 
+   </div> 
+   <!-- END HEADER INNER --> 
+  </div> 
+  <!-- END HEADER --> 
+  <!-- BEGIN HEADER & CONTENT DIVIDER --> 
+  <div class="clearfix"></div> 
+  <!-- END HEADER & CONTENT DIVIDER --> 
+  <!-- BEGIN CONTAINER --> 
+  <div class="page-container"> 
+   <!-- BEGIN SIDEBAR --> 
+   <div class="page-sidebar-wrapper"> 
+    <!-- BEGIN SIDEBAR --> 
+    <!-- DOC: Set data-auto-scroll="false" to disable the sidebar from auto scrolling/focusing --> 
+    <!-- DOC: Change data-auto-speed="200" to adjust the sub menu slide up/down speed --> 
+    <div class="page-sidebar navbar-collapse collapse"> 
+     <ul class="page-sidebar-menu   " data-keep-expanded="false" data-auto-scroll="true" data-slide-speed="200"> 
+      <div class="profile-sidebar"> 
+       <!-- PORTLET MAIN --> 
+       <div class="portlet light profile-sidebar-portlet bordered"> 
+        <!-- SIDEBAR USERPIC --> 
+        <div class="profile-userpic"> 
+         <img src="http://img.soaer.com/pages/media/profile/sunny.jpg" class="img-responsive" alt=""> 
+        </div> 
+        <!-- 博客作者名称 --> 
+        <div class="profile-usertitle"> 
+         <div class="profile-usertitle-name">
+          Sunny
+         </div> 
+        </div> 
+       </div> 
+       <div id="ad"> 
+        <!-- <img  width="100%" src="http://f12.baidu.com/it/u=292560263,2120845313&fm=76"> --> 
+       </div> 
+       <br> 
+       <div class="portlet light bordered"> 
+        <div> 
+         <!-- 阅读次数 --> 
+         <div class="margin-top-10 profile-desc-link" id="blogReadNum"></div> 
+         <!-- 创建时间 --> 
+         <div class="margin-top-10 profile-desc-link" id="blogCreateDate">
+          创建日期：2018年1月12日
+         </div> 
+        </div> 
+        <br> 
+        <div id="lastBlogList"> 
+         <h4 class="profile-desc-title">最近发表的文章</h4> 
+         <!-- <span class="profile-desc-text"> Lorem ipsum dolor sit amet diam nonummy nibh dolore. </span> --> 
+         <!-- 最新发表的博客列表 --> 
+        </div> 
+       </div> 
+       <!-- END PORTLET MAIN --> 
+      </div> 
+     </ul> 
+     <!-- END SIDEBAR MENU --> 
+    </div> 
+    <!-- END SIDEBAR --> 
+   </div> 
+   <!-- END SIDEBAR --> 
+   <!-- BEGIN CONTENT --> 
+   <!-- END QUICK SIDEBAR --> 
+   <div class="page-content-wrapper"> 
+    <div class="page-content"> 
+     <div class="page-head"> 
+      <!-- BEGIN PAGE TITLE --> 
+      <!-- 博客标题 --> 
+      <div id="page-title"> 
+       <h1>docker部署Elasticsearch集群</h1> 
+      </div> 
+      <!-- END PAGE TITLE --> 
+      <!-- BEGIN PAGE TOOLBAR --> 
+      <!-- END PAGE TOOLBAR --> 
+     </div> 
+     <br> 
+     <!-- 博客标签列表 --> 
+     <div class="noteAd">
+      <a href="javascript:;" class="btn btn-circle red disabled">原创</a>
+      <a href="javascript:;" class="btn btn-circle green disabled">标签</a>
+      <a href="javascript:;" class="btn btn-circle green">docker</a>
+      <a href="javascript:;" class="btn btn-circle green">Elasticsearch</a>
+      <a href="javascript:;" class="btn btn-circle green">weave</a>
+      <a href="javascript:;" class="btn btn-circle green">集群</a>
+     </div> 
+     <p></p> 
+     <p>docker部署Elasticsearch Cluster</p> 
+     <h2>安装 docker</h2> 
+     <p>安装docker 查看官方文档：针对每个系统版本进行安装。</p> 
+     <pre lang="undefined">
+https://docs.docker.com/installation/#installation
+</pre> 
+     <h2>启动 docker</h2> 
+     <pre lang="undefined">
+$ sudo service docker start
+
+</pre> 
+     <h2>编写Dockerfile</h2> 
+     <pre lang="undefined">
+FROM     debian:jessie
+MAINTAINER Sunny "liuzhenx@hotmail.com"
+RUN apt-get update
+
+RUN apt-get install -y vim wget curl
+ENV Elasticsearch_version elasticsearch-1.7.0
+RUN echo "root:root" |chpasswd
+
+RUN \
+  echo "deb http://ppa.launchpad.net/webupd8team/java/ubuntu trusty main" | tee -a /etc/apt/sources.list &amp;&amp; \
+  echo "deb-src http://ppa.launchpad.net/webupd8team/java/ubuntu trusty main" | tee -a /etc/apt/sources.list &amp;&amp; \
+  apt-key adv --keyserver keyserver.ubuntu.com --recv-keys EEA14886 &amp;&amp; \
+  apt-get update
+
+RUN \
+  echo debconf shared/accepted-oracle-license-v1-1 select true | debconf-set-selections &amp;&amp; \
+  apt-get install -y oracle-java8-installer &amp;&amp;\
+  apt-get clean
+
+RUN echo "JAVA_HOME=/usr/lib/jvm/java-8-oracle" &gt;&gt; /etc/environment
+
+RUN mkdir /usr/es
+WORKDIR /usr/es
+RUN wget https://download.elastic.co/elasticsearch/elasticsearch/$Elasticsearch_version.tar.gz
+RUN tar -zxf $Elasticsearch_version.tar.gz
+WORKDIR $Elasticsearch_version/config
+RUN mv elasticsearch.yml elasticsearch.yml.bak
+WORKDIR /usr/es
+EXPOSE 9200 9300
+</pre> 
+     <h2>根据Dockerfile制作 images</h2> 
+     <p>Dockerfile文件路径：docker/</p> 
+     <pre lang="undefined">
+sudo docker build -t debian/elasticsearch .
+编译完成后查看镜像
+$ sudo docker images
+REPOSITORY                   TAG                 IMAGE ID            CREATED             VIRTUAL SIZE
+debian/elasticsearch         latest              5f0668a6b9k0        About an hour ago   899.1 MB
+</pre> 
+     <h2>安装weave</h2> 
+     <pre lang="undefined">
+sudo wget -O /usr/local/bin/weave https://raw.githubusercontent.com/zettio/weave/master/weave
+sudo chmod a+x /usr/local/bin/weave
+weave launch &amp;&amp; weave launch-dns &amp;&amp; weave launch-proxy
+sudo weave launch
+sudo weave ps 查看weave的路由状态
+sudo weave status 查看weave状态
+sudo weave expose &lt;addr&gt; 添加IP，能够使主机访问container
+</pre> 
+     <h2>weave 启动container</h2> 
+     <p>在物理机A（192.168.1.135）上启动Container</p> 
+     <pre lang="undefined">
+sudo weave run 10.0.0.1/24 --name "dataNode1" -m 4g -v /opt/conf/data_node_1:/usr/tomcat/conf -v /opt/data/data_node_1:/usr/tomcat/data debian/tomcat
+</pre> 
+     <p>在物理机B（192.168.1.136）上启动Container</p> 
+     <pre lang="undefined">
+sudo weave run 10.0.0.2/24 --name "dataNode2" -m 4g -v /opt/conf/data_node_2:/usr/tomcat/conf -v /opt/data/data_node_2:/usr/tomcat/data debian/tomcat
+</pre> 
+     <p>在物理机A（192.168.1.135）上执行</p> 
+     <pre lang="undefined">
+sudo weave launch
+</pre> 
+     <p>在物理机B（192.168.1.136）上执行</p> 
+     <pre lang="undefined">
+sudo weave launch 192.168.1.136
+sudo weave connect 192.168.1.135
+</pre> 
+     <p></p> 
+     <h2>weave实现container跨主机互联需要注意的地方</h2> 
+     <p>注意：</p> 
+     <p>1.weave 的应用隔离功能</p> 
+     <p>不同子网的container之间是默认隔离的，即使他们在同一台机器上面也不能ping通，不同物理机之间的容器也是默认隔离的。 所以在weave启动container的时候 集群应用的IP必须在同一个字网下面。10.0.0.1，10.0.0.2，而不能是10.0.0.1，10.0.1.1.</p> 
+     <p>2.当container关闭需要重新启动的时候</p> 
+     <pre lang="undefined">
+建议用weave启动container。
+这时候必须制定addr，否则ip会改变。
+</pre> 
+     <pre lang="undefined">
+sudo weave start 10.0.0.1/24 node1
+sudo weave start 10.0.0.2/24 node2
+sudo weave start 10.0.0.3/24 node3
+sudo weave start 10.0.0.4/24 node4
+</pre> 
+     <p>3.宿主机器与container通信的时候，需要执行下面的语句：</p> 
+     <pre lang="undefined">
+sudo weave expose &lt;addr&gt; 添加IP，能够使主机访问container
+此处的addr必须是没有被使用的addr。
+比如：
+sudo weave expose 10.0.0.254/24
+这个10.0.0.254/24地址必须是没有被使用的。
+</pre> 
+     <p>4.使用sudo weave expose 10.0.0.254/24 这种方式能够使宿主机和container通信，但是当宿主机重新启动的时候这个值就不存在了，建议开机启动的时候就设置这个值。</p> 
+     <h2>weave 数据传输图</h2> 
+     <p>(此图是转载的) <img src="http://img.soaer.com/blog/2.jpg" alt=""></p> 
+     <p>从图中可以看到容器之间是怎么跨主机通信的，性能问题可能就住要集中在weave Router上面了</p> 
+     <h2>配置Elasticsearch</h2> 
+     <p>elasticsearch.yml 内容如下</p> 
+     <pre lang="undefined">
+cluster.name: aaaaaaa-name
+node.name: nade_01
+index.number_of_shards: 8
+index.number_of_replicas: 2
+network.host: 10.0.0.1
+transport.tcp.port: 9300
+transport.tcp.compress: true
+path.data: /usr/es/data
+path.logs: /usr/es/logs
+http.port: 9200
+http.enabled: true
+node.master: true
+node.data: true
+index.store.type: mmapfs
+discovery.zen.minimum_master_nodes: 2
+discovery.zen.ping.timeout: 90s
+indices.fielddata.cache.size: 40%
+bootstrap.mlockall: true
+gateway.expected_nodes: 4
+indices.recovery.max_size_per_sec: 100mb
+index.cache.field.type: soft
+node.rack_id: 101150
+cluster.routing.allocation.awareness.attributes: rack_id
+</pre> 
+     <p>配置事项：</p> 
+     <p>1.indices.fielddata.cache.size 这个值如果不用doc_values的话最好设置一下，默认是无上限的。 不过最好启用doc_values ，Elasticsearch官方也说明在以后的版本中doc_values会成为默认值。</p> 
+     <p>2.因为只有两台物理机，并且配置也不一样所以设置了一下分片规则。</p> 
+     <h2>关闭swap</h2> 
+     <p>由于swap会影响Elasticsearch的性能，所以应该关闭swap</p> 
+     <p>请看Es官方提供的方法： <a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/setup-configuration.html" target="_blank">https://www.elastic.co/guide/en/elasticsearch/reference/current/setup-configuration.html</a></p> 
+     <p>注意：官网上说的方法不能在容器里面执行，因为swap是系统功能，应该在宿主机上禁用swap。 docker 容器里面的root的用户如果不是特权容器是没有办法修改这些参数的。还有就是容器最好不要用特权启动，那样容器里面的root和外面的root权限就一样了，很危险。</p> 
+     <h2>修改fd 参数</h2> 
+     <p>和swap修改的方式一样，需要在宿主机上修改， sysctl -w vm.max_map_count=262144 这个事官网修改的值（没有测试），要想彻底修改这个值需要修改/etc/sysctl.conf这个文件，在里面加上vm.max_map_count=262144</p> 
+     <h2>启动容器</h2> 
+     <p>因为要用weave实现cluster，所以容器用weave启动</p> 
+     <pre lang="undefined">
+sudo weave run 10.0.0.1/24 --name "dataNode1" -m 9g -v /opt/conf/data_node_1:/usr/es/elasticsearch-1.7.0/config -v /opt/data/data_node_1:/usr/es/data -v /opt/logs/data_node_1:/usr/es/logs debian/elasticsearch /usr/es/elasticsearch-1.7.0/bin/elasticsearch -D
+</pre> 
+     <p>注意：要把es三个目录挂在外面，配置文件目录、数据目录、日志目录。</p> 
+     <p>这样用docker结合weave 就能实现跨主机的cluster。</p> 
+     <p></p> 
+     <p></p>  
+     <!-- --------------------MarkDown文件去也--------------------------- --> 
+     <!-- --------------------------------------------------------- --> 
+     <br> 
+     <div class="note note-info"> 
+      <div align="left">
+       您也可以看看这两篇文章:&nbsp;&nbsp;
+       <a href="http://blog.soaer.com/1/4e190b5d57cb4a50bbc465e1972d183e.html" id="recommended1">Spring之Spring Security部署</a>&nbsp;&nbsp;
+       <a href="http://blog.soaer.com/1/88c5efdb8cb943e0aaada9fb72d25b84.html" id="recommended2">Elasticsearch部署问题（硬盘挂载错乱）</a>
+      </div> 
+     </div> 
+     <!-- 评论区 --> 
+     <div class="row"> 
+      <div class="col-md-12"> 
+       <!-- BEGIN TODO SIDEBAR --> 
+       <div class="todo-ui"> 
+        <!-- END TODO SIDEBAR --> 
+        <!-- BEGIN TODO CONTENT --> 
+        <div class="todo-content"> 
+         <div class="portlet light bordered"> 
+          <!-- PROJECT HEAD --> 
+          <!-- end PROJECT HEAD --> 
+          <div class="portlet-body"> 
+           <div class="row"> 
+            <div class="todo-tasklist-devider"></div> 
+            <div class="col-md-12 col-sm-8"> 
+             <form class="form-horizontal" id="addComments"> 
+              <!-- TASK HEAD --> 
+              <div class="form"> 
+               <div class="form-group"> 
+                <div class="col-md-8 col-sm-8"> 
+                 <div class="todo-taskbody-user"> 
+                  <img class="todo-userpic pull-left" src="http://img.soaer.com/pages/media/users/avatar6.jpg" width="50px" height="50px"> 
+                  <span class="todo-username pull-left" id="commentsName"></span> 
+                 </div> 
+                </div> 
+               </div> 
+               <!-- TASK DESC --> 
+               <div class="form-group"> 
+                <div class="col-md-12"> 
+                 <textarea class="form-control todo-taskbody-taskdesc" rows="8" placeholder="文明上网" name="content" id="commentsContent"></textarea> 
+                </div> 
+               </div> 
+               <div id="sendCommentsErrorMessage"></div> 
+               <div class="form-actions right todo-form-actions"> 
+                <input type="button" class="btn btn-circle btn-sm green" id="ac" value="提交"> 
+               </div> 
+              </div> 
+             </form> 
+             <form class="form-horizontal" id="sendEmail" style="display:none;"> 
+              <!-- TASK HEAD  style="display:none;" --> 
+              <div class="form"> 
+               <div class="form-group"> 
+                <div class="col-md-12"> 
+                 <textarea class="form-control todo-taskbody-taskdesc" rows="1" name="email" id="sendMailContent" placeholder="邮箱验证，请输入邮箱号"></textarea> 
+                </div> 
+               </div> 
+               <div class="form-actions right todo-form-actions"> 
+                <input type="button" class="btn btn-circle btn-sm green" id="sdm" value="发送"> 
+               </div> 
+              </div> 
+              <div id="sendEmailErrorMessage"></div> 
+             </form> 
+             <form class="form-horizontal" id="validationEmail" style="display:none;"> 
+              <!-- TASK HEAD  style="display:none;" --> 
+              <div class="form"> 
+               <div class="form-group"> 
+                <div class="col-md-12"> 
+                 <textarea class="form-control todo-taskbody-taskdesc" rows="3" name="cid" placeholder="请输入邮箱里面的内容，验证一次再次评论无需验证"></textarea> 
+                </div> 
+               </div> 
+               <div class="form-actions right todo-form-actions"> 
+                <input type="button" class="btn btn-circle btn-sm green" id="vm" value="验证"> 
+               </div> 
+               <div id="validationEmailErrorMessage"></div> 
+              </div> 
+             </form> 
+             <div class="tabbable-line"> 
+              <div class="tab-content"> 
+               <div class="tab-pane active" id="tab_1"> 
+                <!-- TASK COMMENTS --> 
+                <div class="form-group"> 
+                 <div class="col-md-12"> 
+                  <ul class="media-list" id="commentsList"> 
+                   <!-- 单个评论区 --> 
+                   <!-- 单个评论区结束 --> 
+                  </ul> 
+                 </div> 
+                </div> 
+               </div> 
+              </div> 
+             </div> 
+            </div> 
+           </div> 
+          </div> 
+         </div> 
+        </div> 
+        <!-- END TODO CONTENT --> 
+       </div> 
+      </div> 
+      <!-- END PAGE CONTENT--> 
+     </div> 
+    </div> 
+   </div> 
+  </div> 
+  <script src="http://js.soaer.com/global/plugins/jquery.min.js" type="text/javascript"></script> 
+  <script src="http://js.soaer.com/global/plugins/jquery-cookiebar/jquery.cookieBar.min.js" type="text/javascript"></script> 
+  <script src="http://js.soaer.com/global/plugins/bootstrap/js/bootstrap.min.js" type="text/javascript"></script> 
+  <script src="http://js.soaer.com/global/plugins/js.cookie.min.js" type="text/javascript"></script> 
+  <script src="http://js.soaer.com/global/plugins/jquery-slimscroll/jquery.slimscroll.min.js" type="text/javascript"></script> 
+  <script src="http://js.soaer.com/global/plugins/jquery.blockui.min.js" type="text/javascript"></script> 
+  <script src="http://js.soaer.com/global/plugins/bootstrap-switch/js/bootstrap-switch.min.js" type="text/javascript"></script> 
+  <script src="http://js.soaer.com/global/scripts/app.min.js" type="text/javascript"></script> 
+  <script src="http://js.soaer.com/layouts/layout4/scripts/layout.min.js" type="text/javascript"></script> 
+  <script src="http://js.soaer.com/global/plugins/jquery.base64.js" type="text/javascript"></script> 
+  <script src="http://js.soaer.com/layouts/global/scripts/quick-sidebar.min.js" type="text/javascript"></script> 
+  <script src="http://js.soaer.com/global/plugins/js.cookie.min.js" type="text/javascript"></script> 
+  <script src="http://js.soaer.com/layouts/global/scripts/quick-nav.min.js" type="text/javascript"></script> 
+  <script src="http://js.soaer.com/operate/blog.min.js" type="text/javascript"></script>   
+ </body>
+</html>

@@ -1,0 +1,475 @@
+<!doctype html>
+<html lang="en">
+ <!--<![endif]-->
+ <!-- BEGIN HEAD -->
+ <head> 
+  <meta charset="utf-8"> 
+  <!-- 博客标题 --> 
+  <title>OpenSAML2.X 在SSO系统中的应用 - Sunny个人博客</title> 
+  <meta http-equiv="X-UA-Compatible" content="IE=edge"> 
+  <meta name="keywords" content="用户访问SP的受保护资源，SP检查是否有用户的Session，如果用则直接访问，如果没有Session上下文SP随机生成Artifact，并生成AuthnRequest，如果在Cookie中发现票据信"> 
+  <meta name="description" content="用户访问SP的受保护资源，SP检查是否有用户的Session，如果用则直接访问，如果没有Session上下文SP随机生成Artifact，并生成AuthnRequest，如果在Cookie中发现票据信"> 
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+  <meta content="width=device-width, initial-scale=1" name="viewport"> 
+  <meta content="" name="author"> 
+  <!-- javascript初始化区域 --> 
+  <link href="http://css.soaer.com/global/plugins/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css"> 
+  <link href="http://css.soaer.com/global/css/components.min.css" rel="stylesheet" id="style_components" type="text/css"> 
+  <link href="http://css.soaer.com/layouts/layout4/css/layout.min.css" rel="stylesheet" type="text/css"> 
+  <link href="http://css.soaer.com/layouts/layout4/css/themes/default.min.css" rel="stylesheet" type="text/css" id="style_color"> 
+  <link href="http://css.soaer.com/layouts/layout4/css/md.css" rel="stylesheet" type="text/css"> 
+  <link href="http://css.soaer.com/apps/css/todo-2.min.css" rel="stylesheet" type="text/css"> 
+  <link href="http://css.soaer.com/pages/css/profile.min.css" rel="stylesheet" type="text/css"> 
+  <script type="text/javascript">
+var blogKey="ade1183151a64131b870fb8c47f68785" 
+var userName="Sunny" 
+var blogId="44" 
+
+</script>
+ </head> 
+ <body class="page-container-bg-solid page-header-fixed page-sidebar-closed-hide-logo"> 
+  <!-- BEGIN HEADER --> 
+  <div class="page-header navbar navbar-fixed-top"> 
+   <!-- BEGIN HEADER INNER --> 
+   <div class="page-header-inner "> 
+    <div class="page-top"> 
+     <div class="top-menu"> 
+      <ul class="nav navbar-nav pull-right"> 
+       <!-- <li class="separator hide"></li> --> 
+       <li class="dropdown dropdown-user dropdown-dark"><a href="http://www.soaer.com" class="dropdown-toggle" data-hover="dropdown" data-close-others="true"> <span class="username username-hide-on-mobile">首页</span> <img alt="" class="img-circle"> </a></li> 
+       <li class="dropdown dropdown-user dropdown-dark"><a href="http://tool.soaer.com" class="dropdown-toggle" data-hover="dropdown" data-close-others="true"> <span class="username username-hide-on-mobile">常用工具</span> <img alt="" class="img-circle"> </a></li> 
+       <li class="dropdown dropdown-user dropdown-dark"><a href="http://blog.soaer.com" class="dropdown-toggle" data-hover="dropdown" data-close-others="true"> <span class="username username-hide-on-mobile">个人博客</span> <img alt="" class="img-circle"> </a></li> 
+      </ul> 
+     </div> 
+     <!-- END TOP NAVIGATION MENU --> 
+    </div> 
+    <!-- END PAGE TOP --> 
+   </div> 
+   <!-- END HEADER INNER --> 
+  </div> 
+  <!-- END HEADER --> 
+  <!-- BEGIN HEADER & CONTENT DIVIDER --> 
+  <div class="clearfix"></div> 
+  <!-- END HEADER & CONTENT DIVIDER --> 
+  <!-- BEGIN CONTAINER --> 
+  <div class="page-container"> 
+   <!-- BEGIN SIDEBAR --> 
+   <div class="page-sidebar-wrapper"> 
+    <!-- BEGIN SIDEBAR --> 
+    <!-- DOC: Set data-auto-scroll="false" to disable the sidebar from auto scrolling/focusing --> 
+    <!-- DOC: Change data-auto-speed="200" to adjust the sub menu slide up/down speed --> 
+    <div class="page-sidebar navbar-collapse collapse"> 
+     <ul class="page-sidebar-menu   " data-keep-expanded="false" data-auto-scroll="true" data-slide-speed="200"> 
+      <div class="profile-sidebar"> 
+       <!-- PORTLET MAIN --> 
+       <div class="portlet light profile-sidebar-portlet bordered"> 
+        <!-- SIDEBAR USERPIC --> 
+        <div class="profile-userpic"> 
+         <img src="http://img.soaer.com/pages/media/profile/sunny.jpg" class="img-responsive" alt=""> 
+        </div> 
+        <!-- 博客作者名称 --> 
+        <div class="profile-usertitle"> 
+         <div class="profile-usertitle-name">
+          Sunny
+         </div> 
+        </div> 
+       </div> 
+       <div id="ad"> 
+        <!-- <img  width="100%" src="http://f12.baidu.com/it/u=292560263,2120845313&fm=76"> --> 
+       </div> 
+       <br> 
+       <div class="portlet light bordered"> 
+        <div> 
+         <!-- 阅读次数 --> 
+         <div class="margin-top-10 profile-desc-link" id="blogReadNum"></div> 
+         <!-- 创建时间 --> 
+         <div class="margin-top-10 profile-desc-link" id="blogCreateDate">
+          创建日期：2018年1月12日
+         </div> 
+        </div> 
+        <br> 
+        <div id="lastBlogList"> 
+         <h4 class="profile-desc-title">最近发表的文章</h4> 
+         <!-- <span class="profile-desc-text"> Lorem ipsum dolor sit amet diam nonummy nibh dolore. </span> --> 
+         <!-- 最新发表的博客列表 --> 
+        </div> 
+       </div> 
+       <!-- END PORTLET MAIN --> 
+      </div> 
+     </ul> 
+     <!-- END SIDEBAR MENU --> 
+    </div> 
+    <!-- END SIDEBAR --> 
+   </div> 
+   <!-- END SIDEBAR --> 
+   <!-- BEGIN CONTENT --> 
+   <!-- END QUICK SIDEBAR --> 
+   <div class="page-content-wrapper"> 
+    <div class="page-content"> 
+     <div class="page-head"> 
+      <!-- BEGIN PAGE TITLE --> 
+      <!-- 博客标题 --> 
+      <div id="page-title"> 
+       <h1>OpenSAML2.X 在SSO系统中的应用</h1> 
+      </div> 
+      <!-- END PAGE TITLE --> 
+      <!-- BEGIN PAGE TOOLBAR --> 
+      <!-- END PAGE TOOLBAR --> 
+     </div> 
+     <br> 
+     <!-- 博客标签列表 --> 
+     <div class="noteAd">
+      <a href="javascript:;" class="btn btn-circle red disabled">原创</a>
+      <a href="javascript:;" class="btn btn-circle green disabled">标签</a>
+      <a href="javascript:;" class="btn btn-circle green">Spring</a>
+      <a href="javascript:;" class="btn btn-circle green">OpenSaml</a>
+      <a href="javascript:;" class="btn btn-circle green">java</a>
+      <a href="javascript:;" class="btn btn-circle green">SSO</a>
+     </div> 
+     <h2>项目介绍</h2> 
+     <p>OpenSAML在网上的资料也不是很多，在国内用到的应该也不是很多，自己摸索着做了一下，有可能自己对OpenSAML的理解不够到位</p> 
+     <h2>项目准备</h2> 
+     <p>安装Java 安装Maven 安装Eclipse</p> 
+     <p>Maven 配置</p> 
+     <p>配置OpenSAML 依赖 (具体的maven配置可以参考我GitHub上的项目)</p> 
+     <pre lang="undefined">
+&lt;dependency&gt;
+	&lt;groupId&gt;org.opensaml&lt;/groupId&gt;
+	&lt;artifactId&gt;opensaml&lt;/artifactId&gt;
+	&lt;version&gt;2.6.4&lt;/version&gt;
+&lt;/dependency&gt;
+</pre> 
+     <h2>使用方式</h2> 
+     <p>OpenSAML提供了几种方式来实现SSO之间SAML数据传输。本文主要对HTTP Artifact Binding 做个简单介绍</p> 
+     <h2>项目流程</h2> 
+     <p><img src="http://img.soaer.com/blog/4.jpg" alt=""></p> 
+     <p>1.用户访问SP的受保护资源 2.SP检查是否有用户的Session，如果用则直接访问 3.如果没有Session上下文SP随机生成Artifact，并生成AuthnRequest 如果在Cookie中发现票据信息，把票据信息放到AuthnRequest当中 4.SP建立Artifact与AuthnRequest的关联信息 5.SP重定向到IDP的接受Artifact接口，用Get方式发送Artifact，和SP在IDP中的注册ID 6.IDP接受Artifact，然后用HTTP POST方式来请求SP的getAuthnRequest接口(参数为Artifact) 7.SP 接受到IDP传过来的Artifact ，根据Artifact 把关联的AuthnRequest返回给IDP 8.IDP接受到getAuthnRequest然后来验证AuthnRequest的有效性，检查 Status Version 等信息，如果Cookie中的票据不为空，则检查票据是否正确，是否在有效期内，如果票据为空，则重定向用户到登录页面来提交信息。 9.如果票据正确或者用户通过输入用户名密码等信息通过验证，则IDP生成Artifact对象，IDP生成Response对象，并根据用户信息生成断言，同时对Response 中的 断言做签名处理，对票据对象做加密和签名处理，并把票据信息写入Cookie，并建立Artifact与Response的关联关系，并重定向浏览器到SP的getArtifact接口</p> 
+     <ol> 
+      <li> SP 接受到Artifact，并通过HTTP POST的方式把Artifact发送到IDP</li> 
+      <li> IDP通过Artifact找到关联的Response对象返回给SP 12.SP接受到IDP传输过来的Response对象，首先对Response中的断言做验签操作，如果通过，则同意用户访问资源。</li> 
+     </ol> 
+     <p>⚠️：其实对于SP和IDP而言重要的信息其实是AuthnRequest和Response，只不过每次传输到浏览器的时候都是传递的是各自的引用，然后SP和IDP再更具饮用来获取 真实的数据。这样做安全性可能更高一点，但是增加了SP和IDP之间的通信。</p> 
+     <p>⚠️：其中用到的证书都是自己用OpenSSL自己制定。 参考地址：<a href="http://blog.csdn.net/howeverpf/article/details/21622545" target="_blank">http://blog.csdn.net/howeverpf/article/details/21622545</a></p> 
+     <p>SP端发送Artifact的JSP页面</p> 
+     <pre lang="undefined">
+&lt;body&gt;
+	&lt;form action="&lt;%=SysConstants.IDPRECEIVESPARTIFACT_URL%&gt;" method="get" name = "autoForm"&gt;
+		&lt;input type="hidden" name="artifact" value="&lt;%=request.getAttribute(SysConstants.ARTIFACT_KEY)%&gt;" /&gt;
+		&lt;input type="hidden" name="token" value="&lt;%=request.getAttribute(SysConstants.TOKEN_KEY)%&gt;" /&gt;
+	&lt;/form&gt;
+&lt;/body&gt;
+&lt;script type="text/javascript"&gt;
+	document.autoForm.submit();
+&lt;/script&gt;
+</pre> 
+     <p>IDP 端接收Artifact的代码</p> 
+     <pre lang="undefined">
+    // 获取Artifact
+    String artifactBase64 = request.getParameter(SysConstants.ARTIFACT_KEY);
+    if (null == artifactBase64) {
+      throw new RuntimeException("SP端传递的Artifact参数错误，该参数不可为空");
+    }
+    final ArtifactResolve artifactResolve = samlService.buildArtifactResolve();
+    final Artifact artifact = (Artifact) samlService.buildStringToXMLObject(artifactBase64);
+    artifactResolve.setArtifact(artifact);
+    // 对artifactResolve对象进行签名操作
+    samlService.signXMLObject(artifactResolve);
+    String artifactParam = samlService.buildXMLObjectToString(artifactResolve);
+    String postResult = null;
+    //根据Artifact信息从SP中获取Auth Request信息
+    try {
+      postResult = HttpUtil.doPost(SysConstants.SP_ARTIFACT_RESOLUTION_SERVICE, artifactParam);
+    } catch (Exception e) {
+      throw new RuntimeException("访问SP端的：" + SysConstants.SP_ARTIFACT_RESOLUTION_SERVICE + "服务错误" + e.getMessage());
+    }
+    if (null == postResult || "".equals(postResult)) {
+      return "redirect:/loginPage";
+    }
+    final ArtifactResponse artifactResponse = (ArtifactResponse) samlService.buildStringToXMLObject(postResult);
+    final Status status = artifactResponse.getStatus();
+    if (null == status) {
+      throw new RuntimeException("客户端的Status不能为空");
+    }
+    StatusCode statusCode = status.getStatusCode();
+    if (null == statusCode) {
+      throw new RuntimeException("无法获取statusCode");
+    }
+    String codeValue = statusCode.getValue();
+    // 判断SAML的StatusCode
+    if (codeValue == null || !codeValue.equals(StatusCode.SUCCESS_URI)) {
+      throw new RuntimeException("无法获取codeValue， 认证失败， SP端数据错误");
+    }
+    final String inResponseTo = artifactResponse.getInResponseTo();
+    final String artifactResolveID = artifactResolve.getID();
+    if (null == inResponseTo || !inResponseTo.equals(artifactResolveID)) {
+      logger.error("artifact的值和接收端的inResponseTo的值不一致，认证错误");
+      throw new RuntimeException("artifact的值和接收端的inResponseTo的值不一致，认证错误");
+    }
+    final AuthnRequest authnRequest = (AuthnRequest) artifactResponse.getMessage();
+    if (authnRequest == null) {
+      throw new RuntimeException("无法获取AuthRequest数据，认证错误");
+    }
+    // 获取SP的消费URL，下一步回调需要用到
+    final String customerServiceUrl = authnRequest.getAssertionConsumerServiceURL();
+    if (null == customerServiceUrl) {
+      throw new RuntimeException("无法获取customerServiceUrl，SP端数据错误");
+    }
+    request.setAttribute(SysConstants.ACTION_KEY, customerServiceUrl);
+    HttpSession session = request.getSession(false);
+    session.setAttribute(SysConstants.ACTION_KEY, customerServiceUrl);
+    final SAMLVersion samlVersion = authnRequest.getVersion();
+
+    // 判断版本是否支持
+    if (null == samlVersion || !SAMLVersion.VERSION_20.equals(samlVersion)) {
+      throw new RuntimeException("SAML版本错误，只支持2.0");
+    }
+
+    final Issuer issuer = authnRequest.getIssuer();
+    final String appName = issuer.getValue();
+
+    // 判断issure的里面的值是否在SSO系统中注册过
+    final App app = appService.findAppByAppName(appName.trim());
+    if (app == null) {
+      throw new RuntimeException("不支持当前系统: " + appName);
+    }
+    
+    Subject subject = authnRequest.getSubject();
+    NameID nameID = subject.getNameID();
+    String ticket = nameID.getValue();
+    if ("".equals(ticket) || null == ticket) {
+      return "redirect:/loginPage";
+    }
+    try {
+      ticket = URLDecoder.decode(ticket, SysConstants.CHARSET);
+    } catch (UnsupportedEncodingException e) {
+      e.printStackTrace();
+    }
+    /**
+     * 解密ticket
+     */
+    PrivateKey privateKey = samlService.getRSAPrivateKey();
+    String[] afterDecode = null;
+    try {
+      byte[] ticketArray = Base64.decode(ticket);
+      byte[] decryptTicketArray = RSACoder.INSTANCE.decryptByPrivateKey(privateKey, ticketArray);
+      String decryptTicket = new String(decryptTicketArray);
+      afterDecode = decryptTicket.split(SysConstants.TICKET_SPILT);
+    } catch (Exception e) {
+      return "redirect:/loginPage";
+    }
+    logger.debug("Ticket验证痛过");
+    // 判断令牌是否过期，如果令牌过期则直接
+    if (afterDecode == null || afterDecode.length != 3) {
+      return "redirect:/loginPage";
+    }
+    long expireTime = Long.parseLong(afterDecode[2]);
+    long nowTime = System.currentTimeMillis();
+    if (expireTime &lt; nowTime) {
+      logger.debug("Token已过期");
+      return "redirect:/loginPage";
+    }
+    final Artifact idpArtifact = samlService.buildArtifact();
+    final Response samlResponse = samlService.buildResponse(UUIDFactory.INSTANCE.getUUID());
+    long id = Long.parseLong(afterDecode[0]);
+    User user = new User();
+    user.setId(id);
+    user.setEmail(afterDecode[1]);
+    samlService.addAttribute(samlResponse, user);
+    SSOHelper.INSTANCE.put(idpArtifact.getArtifact(), samlResponse);
+    request.setAttribute(SysConstants.ARTIFACT_KEY, samlService.buildXMLObjectToString(idpArtifact));
+    return "/saml/idp/send_artifact_to_sp";
+
+</pre> 
+     <p>SP接受Artifact的代码</p> 
+     <pre lang="undefined">
+    String spArtifact = request.getParameter(SysConstants.ARTIFACT_KEY);
+    if (null == spArtifact) {
+      throw new RuntimeException("无法获取IDP端传过来的Artifact");
+    }
+    ArtifactResolve artifactResolve = samlService.buildArtifactResolve();
+    Artifact artifact = (Artifact) samlService.buildStringToXMLObject(spArtifact);
+    artifactResolve.setArtifact(artifact);
+    samlService.signXMLObject(artifactResolve);
+    String requestStr = samlService.buildXMLObjectToString(artifactResolve);
+    String postResult = null;
+    try {
+      postResult = HttpUtil.doPost(SysConstants.IDP_ARTIFACT_RESOLUTION_SERVICE, requestStr);
+    } catch (Exception e) {
+      e.printStackTrace();
+      logger.error("访问IDP的" + SysConstants.IDP_ARTIFACT_RESOLUTION_SERVICE + "服务错误");
+    }
+    if (null == postResult) {
+      throw new RuntimeException("从" + SysConstants.IDP_ARTIFACT_RESOLUTION_SERVICE + "服务获取的数据为空，请检查IDP端数据格式");
+    }
+    ArtifactResponse artifactResponse = (ArtifactResponse) samlService.buildStringToXMLObject(postResult);
+    SAMLObject samlObject = artifactResponse.getMessage();
+    if (null == samlObject) {
+      throw new RuntimeException("无法获取Response信息");
+    }
+    Response samlResponse = (Response) samlObject;
+    List&lt;Assertion&gt; assertions = samlResponse.getAssertions();
+    if (null == assertions || assertions.size() == 0) {
+      throw new RuntimeException("无法获取断言，请重新发起请求！！！");
+    }
+    Assertion assertion = samlResponse.getAssertions().get(0);
+    if (assertion == null) {
+      request.setAttribute(SysConstants.ERROR_LOGIN, true);
+    } else {
+      /**
+       * 验证签名
+       */
+      boolean signSuccess = samlService.validate(assertion);
+      if (!signSuccess) {
+        throw new RuntimeException("验证签名错误");
+      }
+      HttpSession session = request.getSession(false);
+      List&lt;AttributeStatement&gt; arrtibuteStatements = assertion.getAttributeStatements();
+      if (null == arrtibuteStatements || arrtibuteStatements.size() == 0) {
+        throw new RuntimeException("无法获取属性列表，请重新发起请求");
+      }
+      AttributeStatement attributeStatement = assertion.getAttributeStatements().get(0);
+      List&lt;Attribute&gt; list = attributeStatement.getAttributes();
+      if (null == list) {
+        throw new RuntimeException("无法获取属性列表IDP端错误");
+      }
+      User user = new User();
+      list.forEach(pereAttribute -&gt; {
+        String name = pereAttribute.getName();
+        XSString value = (XSString) pereAttribute.getAttributeValues().get(0);
+        String valueString = value.getValue();
+        if (name.endsWith("Name")) {
+          user.setName(valueString);
+        } else if (name.equals("Id")) {
+          user.setId(Long.parseLong(valueString));
+        } else if (name.equals("LoginId")) {
+          user.setLogin_id(valueString);
+        } else if (name.equals("Email")) {
+          user.setEmail(valueString);
+        }
+      });
+      session.setAttribute(SysConstants.LOGIN_USER, user);
+      putAuthnToSecuritySession("admin", "admin");
+      request.setAttribute(SysConstants.ERROR_LOGIN, false);
+    }
+</pre> 
+     <p></p>  
+     <!-- --------------------MarkDown文件去也--------------------------- --> 
+     <!-- --------------------------------------------------------- --> 
+     <br> 
+     <div class="note note-info"> 
+      <div align="left">
+       您也可以看看这两篇文章:&nbsp;&nbsp;
+       <a href="http://blog.soaer.com/1/bd56722e28c249b18128864b100ba278.html" id="recommended1">OpenResty入门开发篇(三) uuid和zlib</a>&nbsp;&nbsp;
+       <a href="http://blog.soaer.com/1/6bae9cce89804fd9b95030179420f504.html" id="recommended2">OpenResty 入门开发篇（二）-定时任务篇</a>
+      </div> 
+     </div> 
+     <!-- 评论区 --> 
+     <div class="row"> 
+      <div class="col-md-12"> 
+       <!-- BEGIN TODO SIDEBAR --> 
+       <div class="todo-ui"> 
+        <!-- END TODO SIDEBAR --> 
+        <!-- BEGIN TODO CONTENT --> 
+        <div class="todo-content"> 
+         <div class="portlet light bordered"> 
+          <!-- PROJECT HEAD --> 
+          <!-- end PROJECT HEAD --> 
+          <div class="portlet-body"> 
+           <div class="row"> 
+            <div class="todo-tasklist-devider"></div> 
+            <div class="col-md-12 col-sm-8"> 
+             <form class="form-horizontal" id="addComments"> 
+              <!-- TASK HEAD --> 
+              <div class="form"> 
+               <div class="form-group"> 
+                <div class="col-md-8 col-sm-8"> 
+                 <div class="todo-taskbody-user"> 
+                  <img class="todo-userpic pull-left" src="http://img.soaer.com/pages/media/users/avatar6.jpg" width="50px" height="50px"> 
+                  <span class="todo-username pull-left" id="commentsName"></span> 
+                 </div> 
+                </div> 
+               </div> 
+               <!-- TASK DESC --> 
+               <div class="form-group"> 
+                <div class="col-md-12"> 
+                 <textarea class="form-control todo-taskbody-taskdesc" rows="8" placeholder="文明上网" name="content" id="commentsContent"></textarea> 
+                </div> 
+               </div> 
+               <div id="sendCommentsErrorMessage"></div> 
+               <div class="form-actions right todo-form-actions"> 
+                <input type="button" class="btn btn-circle btn-sm green" id="ac" value="提交"> 
+               </div> 
+              </div> 
+             </form> 
+             <form class="form-horizontal" id="sendEmail" style="display:none;"> 
+              <!-- TASK HEAD  style="display:none;" --> 
+              <div class="form"> 
+               <div class="form-group"> 
+                <div class="col-md-12"> 
+                 <textarea class="form-control todo-taskbody-taskdesc" rows="1" name="email" id="sendMailContent" placeholder="邮箱验证，请输入邮箱号"></textarea> 
+                </div> 
+               </div> 
+               <div class="form-actions right todo-form-actions"> 
+                <input type="button" class="btn btn-circle btn-sm green" id="sdm" value="发送"> 
+               </div> 
+              </div> 
+              <div id="sendEmailErrorMessage"></div> 
+             </form> 
+             <form class="form-horizontal" id="validationEmail" style="display:none;"> 
+              <!-- TASK HEAD  style="display:none;" --> 
+              <div class="form"> 
+               <div class="form-group"> 
+                <div class="col-md-12"> 
+                 <textarea class="form-control todo-taskbody-taskdesc" rows="3" name="cid" placeholder="请输入邮箱里面的内容，验证一次再次评论无需验证"></textarea> 
+                </div> 
+               </div> 
+               <div class="form-actions right todo-form-actions"> 
+                <input type="button" class="btn btn-circle btn-sm green" id="vm" value="验证"> 
+               </div> 
+               <div id="validationEmailErrorMessage"></div> 
+              </div> 
+             </form> 
+             <div class="tabbable-line"> 
+              <div class="tab-content"> 
+               <div class="tab-pane active" id="tab_1"> 
+                <!-- TASK COMMENTS --> 
+                <div class="form-group"> 
+                 <div class="col-md-12"> 
+                  <ul class="media-list" id="commentsList"> 
+                   <!-- 单个评论区 --> 
+                   <!-- 单个评论区结束 --> 
+                  </ul> 
+                 </div> 
+                </div> 
+               </div> 
+              </div> 
+             </div> 
+            </div> 
+           </div> 
+          </div> 
+         </div> 
+        </div> 
+        <!-- END TODO CONTENT --> 
+       </div> 
+      </div> 
+      <!-- END PAGE CONTENT--> 
+     </div> 
+    </div> 
+   </div> 
+  </div> 
+  <script src="http://js.soaer.com/global/plugins/jquery.min.js" type="text/javascript"></script> 
+  <script src="http://js.soaer.com/global/plugins/jquery-cookiebar/jquery.cookieBar.min.js" type="text/javascript"></script> 
+  <script src="http://js.soaer.com/global/plugins/bootstrap/js/bootstrap.min.js" type="text/javascript"></script> 
+  <script src="http://js.soaer.com/global/plugins/js.cookie.min.js" type="text/javascript"></script> 
+  <script src="http://js.soaer.com/global/plugins/jquery-slimscroll/jquery.slimscroll.min.js" type="text/javascript"></script> 
+  <script src="http://js.soaer.com/global/plugins/jquery.blockui.min.js" type="text/javascript"></script> 
+  <script src="http://js.soaer.com/global/plugins/bootstrap-switch/js/bootstrap-switch.min.js" type="text/javascript"></script> 
+  <script src="http://js.soaer.com/global/scripts/app.min.js" type="text/javascript"></script> 
+  <script src="http://js.soaer.com/layouts/layout4/scripts/layout.min.js" type="text/javascript"></script> 
+  <script src="http://js.soaer.com/global/plugins/jquery.base64.js" type="text/javascript"></script> 
+  <script src="http://js.soaer.com/layouts/global/scripts/quick-sidebar.min.js" type="text/javascript"></script> 
+  <script src="http://js.soaer.com/global/plugins/js.cookie.min.js" type="text/javascript"></script> 
+  <script src="http://js.soaer.com/layouts/global/scripts/quick-nav.min.js" type="text/javascript"></script> 
+  <script src="http://js.soaer.com/operate/blog.min.js" type="text/javascript"></script>   
+ </body>
+</html>

@@ -1,0 +1,560 @@
+<!doctype html>
+<html lang="en">
+ <!--<![endif]-->
+ <!-- BEGIN HEAD -->
+ <head> 
+  <meta charset="utf-8"> 
+  <!-- 博客标题 --> 
+  <title>Elasticsearch查询之term,should,match,multi_match - Sunny个人博客</title> 
+  <meta http-equiv="X-UA-Compatible" content="IE=edge"> 
+  <meta name="keywords" content="本文主要介绍ES的term,shoule,match,multi_match的用法以及需要注意的事项，每个查询条件的用法以及详细解读"> 
+  <meta name="description" content="本文主要介绍ES的term,shoule,match,multi_match的用法以及需要注意的事项，每个查询条件的用法以及详细解读"> 
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+  <meta content="width=device-width, initial-scale=1" name="viewport"> 
+  <meta content="" name="author"> 
+  <!-- javascript初始化区域 --> 
+  <link href="http://css.soaer.com/global/plugins/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css"> 
+  <link href="http://css.soaer.com/global/css/index.components.min.css" rel="stylesheet" id="style_components" type="text/css"> 
+  <link href="http://css.soaer.com/layouts/layout4/css/layout.min.css" rel="stylesheet" type="text/css"> 
+  <link href="http://css.soaer.com/layouts/layout4/css/themes/default.min.css" rel="stylesheet" type="text/css" id="style_color"> 
+  <link href="http://css.soaer.com/layouts/layout4/css/md.css" rel="stylesheet" type="text/css"> 
+  <link href="http://css.soaer.com/apps/css/todo-2.min.css" rel="stylesheet" type="text/css"> 
+  <link href="http://css.soaer.com/pages/css/profile.min.css" rel="stylesheet" type="text/css"> 
+  <script type="text/javascript">
+var blogKey="e90856a376864336b8ee10cc125d5459" 
+var userName="Sunny" 
+var blogId="50" 
+
+</script>
+ </head> 
+ <body class="page-container-bg-solid page-header-fixed page-sidebar-closed-hide-logo"> 
+  <!-- BEGIN HEADER --> 
+  <div class="page-header navbar navbar-fixed-top"> 
+   <!-- BEGIN HEADER INNER --> 
+   <div class="page-header-inner "> 
+    <div class="page-top"> 
+     <div class="top-menu"> 
+      <ul class="nav navbar-nav pull-right"> 
+       <!-- <li class="separator hide"></li> --> 
+       <li class="dropdown dropdown-user dropdown-dark"><a href="http://www.soaer.com" class="dropdown-toggle" data-hover="dropdown" data-close-others="true"> <span class="username username-hide-on-mobile">首页</span> <img alt="" class="img-circle"> </a></li> 
+       <li class="dropdown dropdown-user dropdown-dark"><a href="http://tool.soaer.com" class="dropdown-toggle" data-hover="dropdown" data-close-others="true"> <span class="username username-hide-on-mobile">常用工具</span> <img alt="" class="img-circle"> </a></li> 
+       <li class="dropdown dropdown-user dropdown-dark"><a href="http://blog.soaer.com" class="dropdown-toggle" data-hover="dropdown" data-close-others="true"> <span class="username username-hide-on-mobile">个人博客</span> <img alt="" class="img-circle"> </a></li> 
+      </ul> 
+     </div> 
+     <!-- END TOP NAVIGATION MENU --> 
+    </div> 
+    <!-- END PAGE TOP --> 
+   </div> 
+   <!-- END HEADER INNER --> 
+  </div> 
+  <!-- END HEADER --> 
+  <!-- BEGIN HEADER & CONTENT DIVIDER --> 
+  <div class="clearfix"></div> 
+  <!-- END HEADER & CONTENT DIVIDER --> 
+  <!-- BEGIN CONTAINER --> 
+  <div class="page-container"> 
+   <!-- BEGIN SIDEBAR --> 
+   <div class="page-sidebar-wrapper"> 
+    <!-- BEGIN SIDEBAR --> 
+    <!-- DOC: Set data-auto-scroll="false" to disable the sidebar from auto scrolling/focusing --> 
+    <!-- DOC: Change data-auto-speed="200" to adjust the sub menu slide up/down speed --> 
+    <div class="page-sidebar navbar-collapse collapse"> 
+     <ul class="page-sidebar-menu   " data-keep-expanded="false" data-auto-scroll="true" data-slide-speed="200"> 
+      <div class="profile-sidebar"> 
+       <!-- PORTLET MAIN --> 
+       <div class="portlet light profile-sidebar-portlet bordered"> 
+        <!-- SIDEBAR USERPIC --> 
+        <div class="profile-userpic"> 
+         <img src="http://img.soaer.com/pages/media/profile/sunny.jpg" class="img-responsive" alt=""> 
+        </div> 
+        <!-- 博客作者名称 --> 
+        <div class="profile-usertitle"> 
+         <div class="profile-usertitle-name">
+          Sunny
+         </div> 
+        </div> 
+       </div> 
+       <div id="ad"> 
+        <!-- <img  width="100%" src="http://f12.baidu.com/it/u=292560263,2120845313&fm=76"> --> 
+       </div> 
+       <br> 
+       <div class="portlet light bordered"> 
+        <div> 
+         <!-- 阅读次数 --> 
+         <div class="margin-top-10 profile-desc-link" id="blogReadNum"></div> 
+         <!-- 创建时间 --> 
+         <div class="margin-top-10 profile-desc-link" id="blogCreateDate">
+          创建日期：2018年1月16日
+         </div> 
+        </div> 
+        <br> 
+        <div id="lastBlogList"> 
+         <h4 class="profile-desc-title">最近发表的文章</h4> 
+         <!-- <span class="profile-desc-text"> Lorem ipsum dolor sit amet diam nonummy nibh dolore. </span> --> 
+         <!-- 最新发表的博客列表 --> 
+        </div> 
+       </div> 
+       <!-- END PORTLET MAIN --> 
+      </div> 
+     </ul> 
+     <!-- END SIDEBAR MENU --> 
+    </div> 
+    <!-- END SIDEBAR --> 
+   </div> 
+   <!-- END SIDEBAR --> 
+   <!-- BEGIN CONTENT --> 
+   <!-- END QUICK SIDEBAR --> 
+   <div class="page-content-wrapper"> 
+    <div class="page-content"> 
+     <div class="page-head"> 
+      <!-- BEGIN PAGE TITLE --> 
+      <!-- 博客标题 --> 
+      <div id="page-title"> 
+       <h1>Elasticsearch查询之term,should,match,multi_match</h1> 
+      </div> 
+      <!-- END PAGE TITLE --> 
+      <!-- BEGIN PAGE TOOLBAR --> 
+      <!-- END PAGE TOOLBAR --> 
+     </div> 
+     <br> 
+     <!-- 博客标签列表 --> 
+     <div class="noteAd">
+      <a href="javascript:;" class="btn btn-circle red disabled">原创</a>
+      <a href="javascript:;" class="btn btn-circle green disabled">标签</a>
+      <a href="javascript:;" class="btn btn-circle green">Elasticsearch</a>
+      <a href="javascript:;" class="btn btn-circle green">term</a>
+      <a href="javascript:;" class="btn btn-circle green">should</a>
+      <a href="javascript:;" class="btn btn-circle green">match</a>
+      <a href="javascript:;" class="btn btn-circle green">multi_match</a>
+      <a href="javascript:;" class="btn btn-circle green">查询</a>
+     </div> 
+     <h2>说明</h2> 
+     <pre><code>最近在做一个搜索博客项目，能够通过关键字来进行搜索。以前也使用过Elasticsearch，所以就直接使用ES来作为搜索服务器，本篇文章主要讲解搜索条件的使用
+</code></pre> 
+     <h2>环境准备</h2> 
+     <pre><code>ubuntu 16.04
+elasticsearch-6.1.1
+</code></pre> 
+     <h2>安装</h2> 
+     <pre><code>直接下载elasticsearch就可使用，jdk安装就不讲了。
+下载地址：https://www.elastic.co/downloads/elasticsearch
+</code></pre> 
+     <h2>启动ES</h2> 
+     <pre><code>bin/elasticsearch -d （后台运行）
+</code></pre> 
+     <h2>安装IK中文分词</h2> 
+     <p>执行下面的命令</p> 
+     <pre><code>./bin/elasticsearch-plugin install https://github.com/medcl/elasticsearch-analysis-ik/releases/download/v6.1.1/elasticsearch-analysis-ik-6.1.1.zip
+</code></pre> 
+     <p>IK分词github地址为:<a href="https://github.com/medcl/elasticsearch-analysis-ik" target="_blank">https://github.com/medcl/elasticsearch-analysis-ik</a>(要找对版本哦)</p> 
+     <h2>创建索引</h2> 
+     <pre><code>curl -XPUT "http://127.0.0.1:9200/blog"
+返回：
+{"acknowledged":true,"shards_acknowledged":true,"index":"yourindex"}
+创建索引成功
+</code></pre> 
+     <h2>创建mapping</h2> 
+     <pre><code>curl -H 'Content-Type:application/json' -XPOST http://127.0.0.1:9200/blog/blog/_mapping -d'
+{
+    "properties": {
+        "content": {
+            "type": "text",
+            "analyzer": "ik_max_word"
+        },
+        "createDate": {
+            "type": "date"
+        }
+        "id": {
+            "type": "long"
+        },
+        "tags": {
+            "properties": {
+                "name": {
+                    "type": "text"
+                }
+            }
+        },
+        "title": {
+            "type": "text",
+            "analyzer": "ik_max_word"
+        }
+    }
+}'
+</code></pre> 
+     <h2>需要注意的地方</h2> 
+     <pre><code>ES在6.0.0版本以前是可以在同一个index下面创建多个type的，但是在6.0.0以后就不允许这样做了，只能映射一个type
+详情请参开：https://www.elastic.co/guide/en/elasticsearch/reference/6.x/removal-of-types.html，而如果还是要添加两个type则会报错，这点一定要注意。
+</code></pre> 
+     <h2>添加一个索引</h2> 
+     <pre><code>curl -H 'Content-Type:application/json' -XPOST http://127.0.0.1:9200/blog/blog -d'
+{
+    "content": "在项目开发中特别是业务系统开发，Session都起到了很重要的作用，Session存放于服务端中，但是在集群模式下Session的实现都有哪几种方式呢，以及需要Load Balance需要配合怎么做呢",
+    "createDate": "2017-12-12",
+    "id": 88,
+    "tag": [
+        {
+            "name": "session"
+        },
+        {
+            "name": "java"
+        },
+        {
+            "name": "分布式"
+        }
+    ],
+    "title": "session在分布式场景下的处理方式"
+}'
+</code></pre> 
+     <h2>查询条件说明-match查询</h2> 
+     <pre><code>查询关键字为：Session 谷歌
+{
+  "query": {
+    "match": {
+        "content" : {
+            "query" : "Session 百度"
+        }
+    }
+  }
+}
+</code></pre> 
+     <p>说明：你输入的关键字会被分词成 Session和百度</p> 
+     <p>match查询中还可以设置一个minimum_should_match字段：他的作用是至少匹配四个词汇中的三个才能匹配成功。</p> 
+     <pre><code>{
+  "query": {
+    "match": {
+        "content" : {
+            "query" : "Session 百度",
+            "operator": "and" （默认值为OR）
+        }
+    }
+  }
+}
+</code></pre> 
+     <pre><code>match查询体里面有一个operator参数，作用是：
+1.operator， 默认值为OR，就拿上面的例子来说吧，如果operator=OR（默认值），那么这个文档是会被搜索出来的因为匹配到了Session，OR的意思就是匹配上Session或者百度的就会被查询出来
+</code></pre> 
+     <h3>使用and等同于下面的查询条件</h3> 
+     <pre><code>{
+    "bool": {
+        "must": [
+            { "term": { "content": "Session" }},
+            { "term": { "content": "百度" }}
+        ]
+    }
+}
+</code></pre> 
+     <h2>查询条件说明-multi_match查询</h2> 
+     <pre><code>{
+    "multi_match": {
+        "query": "Session 百度",
+        "fields": [
+            "content",
+            "tags.name",
+            "title"
+        ],
+        "type": "best_fields",
+        "operator": "OR",
+        "analyzer": "ik_max_word"
+    }
+}
+</code></pre> 
+     <h3>说明如下</h3> 
+     <pre><code>operator:OR和上面提到的match一样，就不再阐述了，analyzer是选择关键字要用什么分词器去分词，比如我这里选择的就是ik_max_word，就会被分词成Session和百度，"type": "best_fields",就是同时匹配上Session 百度的词条评分会比较高。
+fields：根据关键字去文档里面的这些字段里面去查询
+</code></pre> 
+     <p></p> 
+     <h2>查询条件说明-Term&nbsp; Query</h2> 
+     <p>这里借用一下ES官网上的例子</p> 
+     <h3>首先我们建立一个索引的映射关系</h3> 
+     <pre><code>{
+    "mappings": {
+        "my_type": {
+            "properties": {
+                "full_text": {
+                    "type": "text"
+                },
+                "exact_value": {
+                    "type": "keyword"
+                }
+            }
+        }
+    }
+}
+</code></pre> 
+     <p>此处需要说明full_text 类型为text在建立文档的时候会进行分词，exact_value在建立文档的时候不会分词</p> 
+     <h3>建立文档</h3> 
+     <pre><code>{
+    "full_text": "Quick Foxes!",
+    "exact_value": "Quick Foxes!"
+}
+</code></pre> 
+     <p>此时：full_text将包含两个词汇 ["Quick","Foxes"], 而exact_value则只包含一个词汇 ["Quick Foxes!"]</p> 
+     <h3>查询实例</h3> 
+     <pre><code>查询一：
+{
+    "query": {
+        "term": {
+            "exact_value": "Quick Foxes!"
+        }
+    }
+}
+查询二：
+{
+    "query": {
+        "term": {
+            "full_text": "Quick Foxes!"
+        }
+    }
+}
+查询三：
+{
+    "query": {
+        "term": {
+            "full_text": "foxes"
+        }
+    }
+}
+查询四：
+{
+    "query": {
+        "match": {
+            "full_text": "Quick Foxes!"
+        }
+    }
+}
+</code></pre> 
+     <h3>结果</h3> 
+     <pre><code>查询一 ： 匹配成功， term不对query的关键字分词，所以匹配成功
+查询二 ： 匹配失败， 查询关键字为Quick Foxes!， 查询类型是term不对查询内容分词，而full_text里面的两个词汇都不匹配Quick Foxes!， 所以匹配失败
+查询三 ： 匹配成功， 不对foxes分词，full_text的两个词汇中的Foxes匹配成功
+查询四 ： 匹配成功， match查询对Quick Foxes!进行分词，两个都能匹配上，查询成功
+</code></pre> 
+     <h3>term中的boost字段</h3> 
+     <pre><code>{
+    "query": {
+        "bool": {
+            "should": [
+                {
+                    "term": {
+                        "status": {
+                            "value": "urgent",
+                            "boost": 2
+                        }
+                    }
+                },
+                {
+                    "term": {
+                        "status": "normal"
+                    }
+                }
+            ]
+        }
+    }
+}
+</code></pre> 
+     <p>说明：boost字段的意思是该字段如果匹配urgent成功的重要性是匹配normal条件的两倍，boost的默认值为1</p> 
+     <h2>查询条件说明-bool联合查询-should, must, must_not</h2> 
+     <h3>例子</h3> 
+     <pre><code>{
+    "query": {
+        "bool": {
+            "filter": [
+                {
+                    "term": {
+                        "isDelete": {
+                            "value": 0,
+                            "boost": 1
+                        }
+                    }
+                }
+            ],
+            "must": {
+                "match": {
+                    "content": "2017-12-14"
+                }
+            },
+            "must": {
+                "term": {
+                    "content": "2017-12-14"
+                }
+            },
+            "must_not": {
+                "match": {
+                    "title": "分布式"
+                }
+            },
+            "should": [
+                {
+                    "multi_match": {
+                        "query": "入门",
+                        "fields": [
+                            "content^1.0",
+                            "tags.name^1.0",
+                            "title^1.0"
+                        ],
+                        "type": "best_fields",
+                        "operator": "OR",
+                        "analyzer": "ik_max_word",
+                        "slop": 0,
+                        "prefix_length": 0,
+                        "max_expansions": 50,
+                        "zero_terms_query": "NONE",
+                        "auto_generate_synonyms_phrase_query": true,
+                        "fuzzy_transpositions": true,
+                        "boost": 1
+                    }
+                },
+                {
+                    "regexp": {
+                        "title": {
+                            "value": "~*入门~*",
+                            "flags_value": 65535,
+                            "max_determinized_states": 10000,
+                            "boost": 1
+                        }
+                    }
+                },
+                {
+                    "regexp": {
+                        "content": {
+                            "value": "~*入门~*",
+                            "flags_value": 65535,
+                            "max_determinized_states": 10000,
+                            "boost": 1
+                        }
+                    }
+                }
+            ],
+            "adjust_pure_negative": true,
+            "minimum_should_match": "75%",
+            "boost": 1
+        }
+    }
+}
+</code></pre> 
+     <h2>说明</h2> 
+     <pre><code>1.filter：isDelete = 0 是过滤条件，严格匹配。不再多说
+2.must和must_not根据字面意思就是必须必须不条件匹配比较简单，must中可以是match查询也可以是term查询
+3.这里重点收下should, should下面有很多查询条件比如regexp， multi_match等，那么需要匹配几个条件才能查询出文档呢，下面有字段minimum_should_match， 三个条件中的75%会折算成2，即三条 should 语句中至少有两条必须匹配。也可以直接写成"minimum_should_match": "2"，两个值等价。
+</code></pre> 
+     <p></p>  
+     <!-- --------------------MarkDown文件去也--------------------------- --> 
+     <!-- --------------------------------------------------------- --> 
+     <br> 
+     <div class="note note-info"> 
+      <div align="left">
+       您也可以看看这两篇文章:&nbsp;&nbsp;
+       <a href="http://blog.soaer.com/1/2ecaa30da730479a9ca258129f362cac.html" id="recommended1">https双向验证-nginx实例</a>&nbsp;&nbsp;
+       <a href="http://blog.soaer.com/1/b3b4efb151f94a4c8b4a2c25cef39283.html" id="recommended2">Mysql之卸载-乱码解决-忘记密码</a>
+      </div> 
+     </div> 
+     <!-- 评论区 --> 
+     <div class="row"> 
+      <div class="col-md-12"> 
+       <!-- BEGIN TODO SIDEBAR --> 
+       <div class="todo-ui"> 
+        <!-- END TODO SIDEBAR --> 
+        <!-- BEGIN TODO CONTENT --> 
+        <div class="todo-content"> 
+         <div class="portlet light bordered"> 
+          <!-- PROJECT HEAD --> 
+          <!-- end PROJECT HEAD --> 
+          <div class="portlet-body"> 
+           <div class="row"> 
+            <div class="todo-tasklist-devider"></div> 
+            <div class="col-md-12 col-sm-8"> 
+             <form class="form-horizontal" id="addComments"> 
+              <!-- TASK HEAD --> 
+              <div class="form"> 
+               <div class="form-group"> 
+                <div class="col-md-8 col-sm-8"> 
+                 <div class="todo-taskbody-user"> 
+                  <img class="todo-userpic pull-left" src="http://img.soaer.com/pages/media/users/avatar6.jpg" width="50px" height="50px"> 
+                  <span class="todo-username pull-left" id="commentsName"></span> 
+                 </div> 
+                </div> 
+               </div> 
+               <!-- TASK DESC --> 
+               <div class="form-group"> 
+                <div class="col-md-12"> 
+                 <textarea class="form-control todo-taskbody-taskdesc" rows="8" placeholder="文明上网" name="content" id="commentsContent"></textarea> 
+                </div> 
+               </div> 
+               <div id="sendCommentsErrorMessage"></div> 
+               <div class="form-actions right todo-form-actions"> 
+                <input type="button" class="btn btn-circle btn-sm green" id="ac" value="提交"> 
+               </div> 
+              </div> 
+             </form> 
+             <form class="form-horizontal" id="sendEmail" style="display:none;"> 
+              <!-- TASK HEAD  style="display:none;" --> 
+              <div class="form"> 
+               <div class="form-group"> 
+                <div class="col-md-12"> 
+                 <textarea class="form-control todo-taskbody-taskdesc" rows="1" name="email" id="sendMailContent" placeholder="邮箱验证，请输入邮箱号"></textarea> 
+                </div> 
+               </div> 
+               <div class="form-actions right todo-form-actions"> 
+                <input type="button" class="btn btn-circle btn-sm green" id="sdm" value="发送"> 
+               </div> 
+              </div> 
+              <div id="sendEmailErrorMessage"></div> 
+             </form> 
+             <form class="form-horizontal" id="validationEmail" style="display:none;"> 
+              <!-- TASK HEAD  style="display:none;" --> 
+              <div class="form"> 
+               <div class="form-group"> 
+                <div class="col-md-12"> 
+                 <textarea class="form-control todo-taskbody-taskdesc" rows="3" name="cid" placeholder="请输入邮箱里面的内容，验证一次再次评论无需验证"></textarea> 
+                </div> 
+               </div> 
+               <div class="form-actions right todo-form-actions"> 
+                <input type="button" class="btn btn-circle btn-sm green" id="vm" value="验证"> 
+               </div> 
+               <div id="validationEmailErrorMessage"></div> 
+              </div> 
+             </form> 
+             <div class="tabbable-line"> 
+              <div class="tab-content"> 
+               <div class="tab-pane active" id="tab_1"> 
+                <!-- TASK COMMENTS --> 
+                <div class="form-group"> 
+                 <div class="col-md-12"> 
+                  <ul class="media-list" id="commentsList"> 
+                   <!-- 单个评论区 --> 
+                   <!-- 单个评论区结束 --> 
+                  </ul> 
+                 </div> 
+                </div> 
+               </div> 
+              </div> 
+             </div> 
+            </div> 
+           </div> 
+          </div> 
+         </div> 
+        </div> 
+        <!-- END TODO CONTENT --> 
+       </div> 
+      </div> 
+      <!-- END PAGE CONTENT--> 
+     </div> 
+    </div> 
+   </div> 
+  </div> 
+  <script src="http://js.soaer.com/global/plugins/jquery.min.js" type="text/javascript"></script> 
+  <script src="http://js.soaer.com/global/plugins/jquery-cookiebar/jquery.cookieBar.min.js" type="text/javascript"></script> 
+  <script src="http://js.soaer.com/global/plugins/bootstrap/js/bootstrap.min.js" type="text/javascript"></script> 
+  <script src="http://js.soaer.com/global/plugins/js.cookie.min.js" type="text/javascript"></script> 
+  <script src="http://js.soaer.com/global/plugins/jquery-slimscroll/jquery.slimscroll.min.js" type="text/javascript"></script> 
+  <script src="http://js.soaer.com/global/plugins/jquery.blockui.min.js" type="text/javascript"></script> 
+  <script src="http://js.soaer.com/global/plugins/bootstrap-switch/js/bootstrap-switch.min.js" type="text/javascript"></script> 
+  <script src="http://js.soaer.com/global/scripts/app.min.js" type="text/javascript"></script> 
+  <script src="http://js.soaer.com/layouts/layout4/scripts/layout.min.js" type="text/javascript"></script> 
+  <script src="http://js.soaer.com/global/plugins/jquery.base64.js" type="text/javascript"></script> 
+  <script src="http://js.soaer.com/layouts/global/scripts/quick-sidebar.min.js" type="text/javascript"></script> 
+  <script src="http://js.soaer.com/global/plugins/js.cookie.min.js" type="text/javascript"></script> 
+  <script src="http://js.soaer.com/layouts/global/scripts/quick-nav.min.js" type="text/javascript"></script> 
+  <script src="http://js.soaer.com/operate/blog.min.js" type="text/javascript"></script>   
+ </body>
+</html>
