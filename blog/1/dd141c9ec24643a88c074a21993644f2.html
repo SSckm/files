@@ -5,10 +5,10 @@
  <head> 
   <meta charset="utf-8"> 
   <!-- 博客标题 --> 
-  <title>Elasticsearch源码阅读(一) 配置eclipse debug环境 - Sunny个人博客</title> 
+  <title>Elasticsearch入门(二) 集群部署以及原理 - Sunny个人博客</title> 
   <meta http-equiv="X-UA-Compatible" content="IE=edge"> 
-  <meta name="keywords" content="本文主要讲解在eclipse环境中配置Elasticsearch源码环境，阅读Elasticsearch源码"> 
-  <meta name="description" content="本文主要讲解在eclipse环境中配置Elasticsearch源码环境，阅读Elasticsearch源码"> 
+  <meta name="keywords" content="这篇文章主要讲一下Elasticsearch的工作原理，以及一些基本概念。本文主要针对ES6.x版本，"> 
+  <meta name="description" content="这篇文章主要讲一下Elasticsearch的工作原理，以及一些基本概念。本文主要针对ES6.x版本，"> 
   <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
   <meta content="width=device-width, initial-scale=1" name="viewport"> 
   <meta content="" name="author"> 
@@ -20,12 +20,10 @@
   <link href="http://css.soaer.com/layouts/layout4/css/md.css" rel="stylesheet" type="text/css"> 
   <link href="http://css.soaer.com/apps/css/todo-2.min.css" rel="stylesheet" type="text/css"> 
   <link href="http://css.soaer.com/pages/css/profile.min.css" rel="stylesheet" type="text/css"> 
-  <link href="http://css.soaer.com/pages/css/blog.min.css" rel="stylesheet" type="text/css" />
-
   <script type="text/javascript">
-var blogKey="8a984af6d925416ab9bbb37f893a7c72" 
+var blogKey="dd141c9ec24643a88c074a21993644f2" 
 var userName="Sunny" 
-var blogId="54" 
+var blogId="55" 
 
 </script>
  </head> 
@@ -86,7 +84,7 @@ var blogId="54"
          <div class="margin-top-10 profile-desc-link" id="blogReadNum"></div> 
          <!-- 创建时间 --> 
          <div class="margin-top-10 profile-desc-link" id="blogCreateDate">
-          创建日期：2018年1月23日
+          创建日期：2018年1月26日
          </div> 
         </div> 
         <br> 
@@ -112,7 +110,7 @@ var blogId="54"
       <!-- BEGIN PAGE TITLE --> 
       <!-- 博客标题 --> 
       <div id="page-title"> 
-       <h1>Elasticsearch源码阅读(一) 配置eclipse debug环境</h1> 
+       <h1>Elasticsearch入门(二) 集群部署以及原理</h1> 
       </div> 
       <!-- END PAGE TITLE --> 
       <!-- BEGIN PAGE TOOLBAR --> 
@@ -124,97 +122,165 @@ var blogId="54"
       <a href="javascript:;" class="btn btn-circle red disabled">原创</a>
       <a href="javascript:;" class="btn btn-circle green disabled">标签</a>
       <a href="javascript:;" class="btn btn-circle green">Elasticsearch</a>
-      <a href="javascript:;" class="btn btn-circle green">eclipse</a>
-      <a href="javascript:;" class="btn btn-circle green">debug</a>
-      <a href="javascript:;" class="btn btn-circle green">源码阅读</a>
+      <a href="javascript:;" class="btn btn-circle green">集群</a>
+      <a href="javascript:;" class="btn btn-circle green">故障</a>
      </div> 
      <h2>摘要</h2> 
-     <pre><code>本文主要讲解在eclipse环境中配置Elasticsearch源码环境，阅读Elasticsearch源码
+     <pre><code>这篇文章主要讲一下Elasticsearch的工作原理，以及一些基本概念。本文主要针对ES6.x版本，
 </code></pre> 
-     <h2>环境介绍</h2> 
-     <pre><code>操作系统  Mac os
-Elasticsearch 版本：elasticsearch-6.1.2
-java 版本：jdk-9.0.4.jdk
-gradle版本：gradle-4.4.1
+     <h2>环境</h2> 
+     <pre><code>ubuntu 16.04
+elasticsearch 6.1.2
 </code></pre> 
-     <h2>下载Elasticsearch源码</h2> 
-     <pre><code>下载地址：https://github.com/elastic/elasticsearch
-mkdir github
-cd github
-git clone https://github.com/elastic/elasticsearch.git
-推荐使用git clone方式下载源码，因为克隆下来后可以查看任何一个版本的源码，不然还要下载其他版本源码进行对比，比较麻烦
+     <h2>集群（CLuster）</h2> 
+     <pre><code>ES集群是由多节点的共同组成的，所有的节点一起保存用户的文档数据。需要注意的是一个集群只有一个集群名称。开箱即用的集群名称为elasticsearch.只用相同集群名称的节点才能加入同一个集群。
 </code></pre> 
-     <h2>切换版本</h2> 
-     <p>找到需要阅读源码的版本，然后checkout</p> 
-     <div class="blog-img-thumb"><a href=""><img src="http://img.soaer.com/blog/14.png" alt=""></a>
-    </div>
-     <pre><code>找到这个版本的提交版本号， 然后到elasticsearch的git目录
-比如我这里用的版本号是6.1.2的
-git checkout 5b1fea58947fad5b19398a12c50b49fbeebfb722
-这样就切换到这个版本的代码上。
+     <h2>集群原理简介</h2> 
+     <pre><code>Elasticsearch集群可以按需扩容。其中包括水平扩容和垂直扩容，其中垂直扩容可以购买性能更强大的服务器。水平扩容（为集群增加更多的机器）可以将负载压力和数据处理分散到各个节点上去处理。作为用户你可以将请求发送到集群中任何一个节点，每个节点都知道任何一个文档所处的位置，而且每个节点都可以从其他节点收集数据供用户查询。
 </code></pre> 
-     <h2>下载gradle</h2> 
-     <pre><code>很久以前ES还是maven管理的，现在改成了gradle，不是很适应
-下载地址：https://gradle.org/install/
+     <h2>配置文件介绍</h2> 
+     <h3>重要的配置</h3> 
+     <pre><code>node.name: node-1
+cluster.name: soaer
+path.data
+path.logs
+discovery.zen.ping.unicast.hosts
+discovery.zen.minimum_master_nodes
+gateway.recover_after_nodes
 </code></pre> 
-     <h2>配置gradle环境变量</h2> 
-     <pre><code>export GRADLE_HOME="/Users/sunny/software/gradle-4.4.1"
-export G2="$GRADLE_HOME/bin"
-执行source .bash_profile
-测试一下  gradle -v
+     <h3>cluster.name</h3> 
+     <pre><code>集群中的任何一个节点中的cluster.name必须保持一致
 </code></pre> 
-     <h2>配置Eclipse gradle插件</h2> 
-     <pre><code>help-&gt;Eclipse Marketplace
-输入buildship然后安装，如下图所示：
+     <h3>path data &amp; logs</h3> 
+     <pre><code>数据目录和日志目录，不在介绍了
 </code></pre> 
-     <p><img src="http://img.soaer.com/blog/15.png" alt=""></p> 
-     <h2>eclipse配置gradle</h2> 
-     <pre><code>在偏好设置里面配置一下gradle的安装路径
+     <h3>discovery.zen.ping.unicast.hosts</h3> 
+     <pre><code>这个值的默认设置是["127.0.0.1", "[::1]"]。
+这个值主要是在ES节点启动的时候会寻找的主机列表。默认扫描9300到9305端口
+注意：如果这里配置的是域名的话，会扫描该域名由DNS解析出来的所有IP地址。
+如果节点在其他的服务器上，需要配置该服务器的ip和端口号
 </code></pre> 
-     <h2>eclipse支持</h2> 
-     <pre><code>cd $es_git_home(克隆下来的项目根路径)
-gradle eclipse (会很长时间，下载一些jar包)
+     <h3>discovery.zen.minimum_master_nodes</h3> 
+     <pre><code>这个就比较重要了，这个配置意思就是当一个节点有资格成为主节点，那么这个节点必须可见的主合格节点的最小数目，以便组成集群。说白了就是为了防止‘脑裂’。官方的建议是 (有资格成为主节点的数目/2) + 1. 默认值为1。
+如果设置的过小，日志会打印出如下信息：
+
+[2018-01-24T10:06:16,652][WARN ][o.e.d.z.ElectMasterService] [node-3] value for setting "discovery.zen.minimum_master_nodes" is too low. This can result in data loss! Please set it to at least a quorum of master-eligible nodes (current value: [-1], total number of master-eligible nodes used for publishing in this round: [2])
 </code></pre> 
-     <h2>导入Eclipse</h2> 
-     <pre><code>在eclipse安装完成gradle插件后需要重新启动eclipse
-注意不能直接导入克隆下来的项目，需要导入gradle项目。
-import--&gt;Gradle--&gt;Existing Gradle project
-然后next 选择git clone的项目路径 就可以了。
-成功导入后如下图所示：
+     <h3>gateway.recover_after_nodes</h3> 
+     <pre><code>这个值的意思是当集群中多少台机器成功加入集群后开始恢复数据。建议集群节点的一半节点
 </code></pre> 
-     <p><img src="http://img.soaer.com/blog/19.png" alt=""></p> 
-     <h2>配置Eclipse启动参数</h2> 
-     <p><img src="http://img.soaer.com/blog/20.png" alt=""></p> 
-     <pre><code>-Des.path.conf="/Users/sunny/software/elasticsearch-6.1.2/config"
--Des.path.home="/Users/sunny/software/elasticsearch-6.1.2"
--Des.path.data="/Users/sunny/software/elasticsearch-6.1.2/data"
--Dlog4j2.disable.jmx=true
--Des.path.logs="/Users/sunny/software/elasticsearch-6.1.2/log"
+     <h2>节点介绍</h2> 
+     <pre><code>node.master: true  默认值：true
+node.data: false 默认值：true
 </code></pre> 
-     <h2>启动Elasticsearch</h2> 
-     <p>直接点击Run</p> 
-     <pre><code>[2018-01-23T11:04:44,305][INFO ][o.e.n.Node               ] [] initializing ...
-[2018-01-23T11:04:44,474][INFO ][o.e.e.NodeEnvironment    ] [_ICupdp] using [1] data paths, mounts [[/ (/dev/disk1s1)]], net usable_space [54.2gb], net total_space [112.8gb], types [apfs]
-...
-...
-...
-...
-[2018-01-23T11:05:01,267][INFO ][o.e.h.n.Netty4HttpServerTransport] [_ICupdp] publish_address {127.0.0.1:9200}, bound_addresses {[::1]:9200}, {127.0.0.1:9200}
-[2018-01-23T11:05:01,267][INFO ][o.e.n.Node               ] [_ICupdp] started
+     <h3>node.master</h3> 
+     <pre><code>设置为true，则表明此节点有条件被选举为主主节点，监控整个集群,主要针对节点的加入和删除，索引的创建和删除等功能。
 </code></pre> 
-     <p>OK, 启动成功</p> 
+     <h3>node.data</h3> 
+     <pre><code>数据设置为true(默认)。此节点保存数据并执行诸如CRUD、搜索和聚合等相关操作。
+</code></pre> 
+     <h2>客户端节点</h2> 
+     <pre><code>当node.master设置为false, node.data也设置为false的情况下，那么这个节点可以叫做客户端节点。
+</code></pre> 
+     <h2>集群分片</h2> 
+     <pre><code>在创建一个索引后就会为这个索引创建5个分片，默认为五个，可以在配置文件里面修改。比如有两个索引，那么主分片就会有10个。
+</code></pre> 
+     <h2>查看分片分配情况</h2> 
+     <p>测试用例</p> 
+     <pre><code>五个节点：node-1, node-2, node-3, node-4, node-5 ,
+其中 node-1, node-2, node-3设置为  默认设置
+node-4设置为：node.master: false, node.data: false
+node-5设置为：node.master: true, node.data: false
+
+注意：加入此时你设置了node-5为node.master: true, node.data: false， 他也不一定就是master节点，因为1,2,3也有资格成为master节点。是选举出来的。
+创建了一个索引一共五个分片（0,1,2,3,4）
+下面来看分片的分配情况：
+</code></pre> 
+     <pre><code>cd /home/es/node/{1-5}/elasticsearch-6.1.2/data/nodes/0/indices， 可以看到如下信息：
+
+node-1:存储的  1,3,4
+node-2:存储的  0,1,2,3
+node-3:存储的  0,2,4
+node-4:是客户端节点，所以没有数据，只有一个_state目录，和一个node.lock文件
+node-5:设置的是只能是master，所以在node-5的data目录里面也看不到分片。
+共十个分片， 五个主分片五个副本，当然也可以安装head插件查看分片部署情况， 可以看到任何一个节点宕机后集群任然可以提供全部的搜索服务。避免单点故障。
+注意：主分片在创建索引后不可修改，副本分片的数目可以修改。如果想修主分片只能reindex了。（后面章节会详细降到重建索引部分）
+</code></pre> 
+     <h2>集群状态</h2> 
+     <pre><code>五个节点启动成功后访问一下测试：
+es@ubuntu:~$ curl localhost:9200/_cluster/health?pretty
+{
+  "cluster_name" : "soaer",
+  "status" : "green",
+  "timed_out" : false,
+  "number_of_nodes" : 5,
+  "number_of_data_nodes" : 3,
+  "active_primary_shards" : 5,
+  "active_shards" : 10,
+  "relocating_shards" : 0,
+  "initializing_shards" : 0,
+  "unassigned_shards" : 0,
+  "delayed_unassigned_shards" : 0,
+  "number_of_pending_tasks" : 0,
+  "number_of_in_flight_fetch" : 0,
+  "task_max_waiting_in_queue_millis" : 0,
+  "active_shards_percent_as_number" : 100.0
+}
+状态有三种：green  yellow   red
+green：全部分片都可以，主分片和副本分片
+yello:全部住分片可以使用， 副本分片部分不可用
+red:部分住分片不可以用
+</code></pre> 
+     <h2>实战集群状态red</h2> 
+     <pre><code>为了测试当集群为red的情况下是否可以建立索引，我们瞬间把node-2，和node-3暂定掉，查看集群状态为red，只有三个主分片可以用。
+sunny@ubuntu:~$ curl localhost:9200/_cluster/health?pretty
+{
+  "cluster_name" : "soaer",
+  "status" : "red",
+  "timed_out" : false,
+  "number_of_nodes" : 3,
+  "number_of_data_nodes" : 1,
+  "active_primary_shards" : 3,
+  "active_shards" : 3,
+  "relocating_shards" : 0,
+  "initializing_shards" : 0,
+  "unassigned_shards" : 7,
+  "delayed_unassigned_shards" : 7,
+  "number_of_pending_tasks" : 0,
+  "number_of_in_flight_fetch" : 0,
+  "task_max_waiting_in_queue_millis" : 0,
+  "active_shards_percent_as_number" : 30.0
+}
+</code></pre> 
      <h2>测试</h2> 
-     <pre><code>在浏览器中直接输入 localhost:9200就可以看到ES的输出信息了。
+     <pre><code>curl -H 'Content-Type:application/json' -XPOST http://localhost:9200/index/test/1 -d'
+	{"content":"sunny is a good boy"}
+'
+结果成功：可以插入
+curl -H 'Content-Type:application/json' -XPOST http://localhost:9200/index/test/2 -d'
+	{"content":"sunny is a good boy"}
+'
+插入失败：不能插入。后台报错
+org.elasticsearch.action.UnavailableShardsException: [index][2] primary shard is not active Timeout: [1m], request: [BulkShardRequest [[index][2]] containing [index {[index][test][2], source[
+
+
+curl -H 'Content-Type:application/json' -XPOST http://localhost:9200/index/_search?pretty
+也可以查询出来刚才插入的两条文档，能够提供搜索服务。
+说明再插入ID为2的文档的时候找不到2所对应的主分片，所以插入失败。
+所以当集群状态为red的情况下，是可以对外提供服务的 但是不能提供全部服务。
 </code></pre> 
-     <p>这样我们就可以在eclipse中debug调试Elasticsearch了。</p>  
+     <h2>恢复node-2和node-3</h2> 
+     <pre><code>集群状态恢复到green，插入id为2的文档也能插入了，能够提供全部的服务。
+</code></pre> 
+     <p></p>  
      <!-- --------------------MarkDown文件去也--------------------------- --> 
      <!-- --------------------------------------------------------- --> 
      <br> 
      <div class="note note-info"> 
       <div align="left">
        您也可以看看这两篇文章:&nbsp;&nbsp;
-       <a href="http://blog.soaer.com/1/c59e38c117d24f578d45eb8ff6d241f6.html" id="recommended1">Elasticsearch入门(一) 安装和配置插件</a>&nbsp;&nbsp;
-       <a href="http://blog.soaer.com/1/9c1e6ab087564203abe1298343db127a.html" id="recommended2">Maven学习(一) 安装以及常用命令</a>
+       <a href="http://blog.soaer.com/1/8a984af6d925416ab9bbb37f893a7c72.html" id="recommended1">Elasticsearch源码阅读(一) 配置eclipse debug环境</a>&nbsp;&nbsp;
+       <a href="http://blog.soaer.com/1/c59e38c117d24f578d45eb8ff6d241f6.html" id="recommended2">Elasticsearch入门(一) 安装和配置插件</a>
       </div> 
      </div> 
      <!-- 评论区 --> 
