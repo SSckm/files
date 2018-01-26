@@ -13,6 +13,8 @@
   <meta content="width=device-width, initial-scale=1" name="viewport"> 
   <meta content="" name="author"> 
   <!-- javascript初始化区域 --> 
+    <link href="http://blog.soaer.com/global/plugins/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css" />
+  <link href="http://blog.soaer.com/global/plugins/simple-line-icons/simple-line-icons.min.css" rel="stylesheet" type="text/css" />
   <link href="http://css.soaer.com/global/plugins/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css"> 
   <link href="http://css.soaer.com/global/css/index.components.min.css" rel="stylesheet" id="style_components" type="text/css"> 
   <link href="http://css.soaer.com/layouts/layout4/css/layout.min.css" rel="stylesheet" type="text/css"> 
@@ -34,12 +36,25 @@ var blogId="55"
    <div class="page-header-inner "> 
     <div class="page-top"> 
      <div class="top-menu"> 
-      <ul class="nav navbar-nav pull-right"> 
-       <!-- <li class="separator hide"></li> --> 
-       <li class="dropdown dropdown-user dropdown-dark"><a href="http://www.soaer.com" class="dropdown-toggle" data-hover="dropdown" data-close-others="true"> <span class="username username-hide-on-mobile">首页</span> <img alt="" class="img-circle"> </a></li> 
-       <li class="dropdown dropdown-user dropdown-dark"><a href="http://tool.soaer.com" class="dropdown-toggle" data-hover="dropdown" data-close-others="true"> <span class="username username-hide-on-mobile">常用工具</span> <img alt="" class="img-circle"> </a></li> 
-       <li class="dropdown dropdown-user dropdown-dark"><a href="http://blog.soaer.com" class="dropdown-toggle" data-hover="dropdown" data-close-others="true"> <span class="username username-hide-on-mobile">个人博客</span> <img alt="" class="img-circle"> </a></li> 
-      </ul> 
+        <ul class="nav navbar-nav pull-right">
+          <li class="separator hide"></li>
+          <li class="dropdown dropdown-extended dropdown-notification dropdown-dark"
+              id="header_notification_bar"><a href="http://www.soaer.com"
+              class="dropdown-toggle" data-close-others="true"> <i
+              class="fa fa-home"></i> <span class="badge badge-success">首页</span></a>
+          </li>
+          <li class="separator hide"></li>
+          <li class="dropdown dropdown-extended dropdown-inbox dropdown-dark" id="header_inbox_bar">
+            <a href="http://tool.soaer.com" class="dropdown-toggle" data-close-others="true"> 
+              <i class="fa fa-cog"></i> <span class="badge badge-danger">工具</span>
+            </a>
+          </li>
+          <li class="separator hide"></li>
+          <li class="dropdown dropdown-extended dropdown-tasks dropdown-dark" id="header_task_bar"><a href="http://blog.soaer.com"
+              class="dropdown-toggle" data-close-others="true"> 
+              <i class="fa fa-file"></i> <span class="badge badge-primary">博客</span></a>
+          </li>
+        </ul>
      </div> 
      <!-- END TOP NAVIGATION MENU --> 
     </div> 
