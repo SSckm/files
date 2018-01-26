@@ -228,8 +228,8 @@ es@ubuntu:~$ curl localhost:9200/_cluster/health?pretty
 }
 状态有三种：green  yellow   red
 green：全部分片都可以，主分片和副本分片
-yello:全部住分片可以使用， 副本分片部分不可用
-red:部分住分片不可以用
+yello:全部主分片可以使用， 副本分片部分不可用
+red:部分主分片不可以用
 </code></pre> 
      <h2>实战集群状态red</h2> 
      <pre><code>为了测试当集群为red的情况下是否可以建立索引，我们瞬间把node-2，和node-3暂定掉，查看集群状态为red，只有三个主分片可以用。
