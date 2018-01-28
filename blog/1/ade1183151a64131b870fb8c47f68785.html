@@ -13,15 +13,15 @@
   <meta content="width=device-width, initial-scale=1" name="viewport"> 
   <meta content="" name="author"> 
   <!-- javascript初始化区域 --> 
-    <link href="http://blog.soaer.com/global/plugins/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css" />
-  <link href="http://blog.soaer.com/global/plugins/simple-line-icons/simple-line-icons.min.css" rel="stylesheet" type="text/css" />
-  <link href="http://css.soaer.com/global/plugins/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css"> 
-  <link href="http://css.soaer.com/global/css/components.min.css" rel="stylesheet" id="style_components" type="text/css"> 
-  <link href="http://css.soaer.com/layouts/layout4/css/layout.min.css" rel="stylesheet" type="text/css"> 
-  <link href="http://css.soaer.com/layouts/layout4/css/themes/default.min.css" rel="stylesheet" type="text/css" id="style_color"> 
-  <link href="http://css.soaer.com/layouts/layout4/css/md.css" rel="stylesheet" type="text/css"> 
-  <link href="http://css.soaer.com/apps/css/todo-2.min.css" rel="stylesheet" type="text/css"> 
-  <link href="http://css.soaer.com/pages/css/profile.min.css" rel="stylesheet" type="text/css"> 
+  <link href="https://blog.soaer.com/global/plugins/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css" />
+  <link href="https://blog.soaer.com/global/plugins/simple-line-icons/simple-line-icons.min.css" rel="stylesheet" type="text/css" />
+  <link href="https://css.soaer.com/global/plugins/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css"> 
+  <link href="https://css.soaer.com/global/css/index.components.min.css" rel="stylesheet" id="style_components" type="text/css"> 
+  <link href="https://css.soaer.com/layouts/layout4/css/layout.min.css" rel="stylesheet" type="text/css"> 
+  <link href="https://css.soaer.com/layouts/layout4/css/themes/default.min.css" rel="stylesheet" type="text/css" id="style_color"> 
+  <link href="https://css.soaer.com/layouts/layout4/css/md.css" rel="stylesheet" type="text/css"> 
+  <link href="https://css.soaer.com/apps/css/todo-2.min.css" rel="stylesheet" type="text/css"> 
+  <link href="https://css.soaer.com/pages/css/profile.min.css" rel="stylesheet" type="text/css"> 
   <script type="text/javascript">
 var blogKey="ade1183151a64131b870fb8c47f68785" 
 var userName="Sunny" 
@@ -39,18 +39,18 @@ var blogId="44"
         <ul class="nav navbar-nav pull-right">
           <li class="separator hide"></li>
           <li class="dropdown dropdown-extended dropdown-notification dropdown-dark"
-              id="header_notification_bar"><a href="http://www.soaer.com"
+              id="header_notification_bar"><a href="https://www.soaer.com"
               class="dropdown-toggle" data-close-others="true"> <i
               class="fa fa-home"></i> <span class="badge badge-success">首页</span></a>
           </li>
           <li class="separator hide"></li>
           <li class="dropdown dropdown-extended dropdown-inbox dropdown-dark" id="header_inbox_bar">
-            <a href="http://tool.soaer.com" class="dropdown-toggle" data-close-others="true"> 
+            <a href="https://tool.soaer.com" class="dropdown-toggle" data-close-others="true"> 
               <i class="fa fa-cog"></i> <span class="badge badge-danger">工具</span>
             </a>
           </li>
           <li class="separator hide"></li>
-          <li class="dropdown dropdown-extended dropdown-tasks dropdown-dark" id="header_task_bar"><a href="http://blog.soaer.com"
+          <li class="dropdown dropdown-extended dropdown-tasks dropdown-dark" id="header_task_bar"><a href="https://blog.soaer.com"
               class="dropdown-toggle" data-close-others="true"> 
               <i class="fa fa-file"></i> <span class="badge badge-primary">博客</span></a>
           </li>
@@ -80,7 +80,7 @@ var blogId="44"
        <div class="portlet light profile-sidebar-portlet bordered"> 
         <!-- SIDEBAR USERPIC --> 
         <div class="profile-userpic"> 
-         <img src="http://img.soaer.com/pages/media/profile/sunny.jpg" class="img-responsive" alt=""> 
+         <img src="https://img.soaer.com/pages/media/profile/sunny.jpg" class="img-responsive" alt=""> 
         </div> 
         <!-- 博客作者名称 --> 
         <div class="profile-usertitle"> 
@@ -157,7 +157,7 @@ var blogId="44"
      <h2>使用方式</h2> 
      <p>OpenSAML提供了几种方式来实现SSO之间SAML数据传输。本文主要对HTTP Artifact Binding 做个简单介绍</p> 
      <h2>项目流程</h2> 
-     <p><img src="http://img.soaer.com/blog/4.jpg" alt=""></p> 
+     <p><img src="https://img.soaer.com/blog/4.jpg" alt=""></p> 
      <p>1.用户访问SP的受保护资源 2.SP检查是否有用户的Session，如果用则直接访问 3.如果没有Session上下文SP随机生成Artifact，并生成AuthnRequest 如果在Cookie中发现票据信息，把票据信息放到AuthnRequest当中 4.SP建立Artifact与AuthnRequest的关联信息 5.SP重定向到IDP的接受Artifact接口，用Get方式发送Artifact，和SP在IDP中的注册ID 6.IDP接受Artifact，然后用HTTP POST方式来请求SP的getAuthnRequest接口(参数为Artifact) 7.SP 接受到IDP传过来的Artifact ，根据Artifact 把关联的AuthnRequest返回给IDP 8.IDP接受到getAuthnRequest然后来验证AuthnRequest的有效性，检查 Status Version 等信息，如果Cookie中的票据不为空，则检查票据是否正确，是否在有效期内，如果票据为空，则重定向用户到登录页面来提交信息。 9.如果票据正确或者用户通过输入用户名密码等信息通过验证，则IDP生成Artifact对象，IDP生成Response对象，并根据用户信息生成断言，同时对Response 中的 断言做签名处理，对票据对象做加密和签名处理，并把票据信息写入Cookie，并建立Artifact与Response的关联关系，并重定向浏览器到SP的getArtifact接口</p> 
      <ol> 
       <li> SP 接受到Artifact，并通过HTTP POST的方式把Artifact发送到IDP</li> 
@@ -374,12 +374,12 @@ var blogId="44"
      <div class="note note-info"> 
       <div align="left">
        <a href="javascript:;" class="btn btn-circle green disabled">上一篇</a>&nbsp;&nbsp;
-       <a href="http://blog.soaer.com/1/bd56722e28c249b18128864b100ba278.html" id="recommended1">OpenResty入门开发篇(三) uuid和zlib</a>
+       <a href="https://blog.soaer.com/1/bd56722e28c249b18128864b100ba278.html" id="recommended1">OpenResty入门开发篇(三) uuid和zlib</a>
       </div> 
       <br />
       <div align="left">
        <a href="javascript:;" class="btn btn-circle green disabled">下一篇</a> &nbsp;&nbsp;
-       <a href="http://blog.soaer.com/1/4e190b5d57cb4a50bbc465e1972d183e.html" id="recommended2">Spring之Spring Security部署</a>
+       <a href="https://blog.soaer.com/1/4e190b5d57cb4a50bbc465e1972d183e.html" id="recommended2">Spring之Spring Security部署</a>
       </div>
      </div> 
      <!-- 评论区 --> 
@@ -403,7 +403,7 @@ var blogId="44"
                <div class="form-group"> 
                 <div class="col-md-8 col-sm-8"> 
                  <div class="todo-taskbody-user"> 
-                  <img class="todo-userpic pull-left" src="http://img.soaer.com/pages/media/users/avatar6.jpg" width="50px" height="50px"> 
+                  <img class="todo-userpic pull-left" src="https://img.soaer.com/pages/media/users/avatar6.jpg" width="50px" height="50px"> 
                   <span class="todo-username pull-left" id="commentsName"></span> 
                  </div> 
                 </div> 
@@ -476,19 +476,19 @@ var blogId="44"
     </div> 
    </div> 
   </div> 
-  <script src="http://js.soaer.com/global/plugins/jquery.min.js" type="text/javascript"></script> 
-  <script src="http://js.soaer.com/global/plugins/jquery-cookiebar/jquery.cookieBar.min.js" type="text/javascript"></script> 
-  <script src="http://js.soaer.com/global/plugins/bootstrap/js/bootstrap.min.js" type="text/javascript"></script> 
-  <script src="http://js.soaer.com/global/plugins/js.cookie.min.js" type="text/javascript"></script> 
-  <script src="http://js.soaer.com/global/plugins/jquery-slimscroll/jquery.slimscroll.min.js" type="text/javascript"></script> 
-  <script src="http://js.soaer.com/global/plugins/jquery.blockui.min.js" type="text/javascript"></script> 
-  <script src="http://js.soaer.com/global/plugins/bootstrap-switch/js/bootstrap-switch.min.js" type="text/javascript"></script> 
-  <script src="http://js.soaer.com/global/scripts/app.min.js" type="text/javascript"></script> 
-  <script src="http://js.soaer.com/layouts/layout4/scripts/layout.min.js" type="text/javascript"></script> 
-  <script src="http://js.soaer.com/global/plugins/jquery.base64.js" type="text/javascript"></script> 
-  <script src="http://js.soaer.com/layouts/global/scripts/quick-sidebar.min.js" type="text/javascript"></script> 
-  <script src="http://js.soaer.com/global/plugins/js.cookie.min.js" type="text/javascript"></script> 
-  <script src="http://js.soaer.com/layouts/global/scripts/quick-nav.min.js" type="text/javascript"></script> 
-  <script src="http://js.soaer.com/operate/blog.min.js" type="text/javascript"></script>   
+  <script src="https://js.soaer.com/global/plugins/jquery.min.js" type="text/javascript"></script> 
+  <script src="https://js.soaer.com/global/plugins/jquery-cookiebar/jquery.cookieBar.min.js" type="text/javascript"></script> 
+  <script src="https://js.soaer.com/global/plugins/bootstrap/js/bootstrap.min.js" type="text/javascript"></script> 
+  <script src="https://js.soaer.com/global/plugins/js.cookie.min.js" type="text/javascript"></script> 
+  <script src="https://js.soaer.com/global/plugins/jquery-slimscroll/jquery.slimscroll.min.js" type="text/javascript"></script> 
+  <script src="https://js.soaer.com/global/plugins/jquery.blockui.min.js" type="text/javascript"></script> 
+  <script src="https://js.soaer.com/global/plugins/bootstrap-switch/js/bootstrap-switch.min.js" type="text/javascript"></script> 
+  <script src="https://js.soaer.com/global/scripts/app.min.js" type="text/javascript"></script> 
+  <script src="https://js.soaer.com/layouts/layout4/scripts/layout.min.js" type="text/javascript"></script> 
+  <script src="https://js.soaer.com/global/plugins/jquery.base64.js" type="text/javascript"></script> 
+  <script src="https://js.soaer.com/layouts/global/scripts/quick-sidebar.min.js" type="text/javascript"></script> 
+  <script src="https://js.soaer.com/global/plugins/js.cookie.min.js" type="text/javascript"></script> 
+  <script src="https://js.soaer.com/layouts/global/scripts/quick-nav.min.js" type="text/javascript"></script> 
+  <script src="https://js.soaer.com/operate/blog.min.js" type="text/javascript"></script> 
  </body>
 </html>
