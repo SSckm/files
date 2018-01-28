@@ -150,16 +150,16 @@ var blogId="47"
 第一个用户第一次访问的1号服务器，那个在用户的整个会话中都必须由负载均衡服务器导流到1号服务器上面。其他服务器不会保存1号用户的Session信息。
 现在的负载均衡服务器一般都有这个功能（nginx）
 </code></pre> 
-     <p><img src="http://img.soaer.com/blog/5.jpg" alt=""></p> 
+     <p><img src="https://img.soaer.com/blog/5.jpg" alt=""></p> 
      <pre><code>但是如果出现下面的情况其中一台服务器宕机了：（如图所示）
 </code></pre> 
-     <p><img src="http://img.soaer.com/blog/6.jpg" alt=""></p> 
+     <p><img src="https://img.soaer.com/blog/6.jpg" alt=""></p> 
      <pre><code>这个时候1号服务器宕机的情况下，负载均衡服务器会把1号用户导流到2号或者3号服务器上面，但是用户在2和3号服务器上面没有安全的上下文环境，服务器会通知用户重新登录。这样用户体验肯定会受到影响。而且很可能用造成用户的数据丢失。
 </code></pre> 
      <h2>每台服务器保留全部Session</h2> 
      <pre><code>每台服务器保留全部用户的Session这就关系到应用服务器之间的Session同步问题，实时性要求比较高。这种方式能够避免上面服务器独立Session所遇到的问题，如下图所示：
 </code></pre> 
-     <p><img src="http://img.soaer.com/blog/7.jpg" alt=""></p> 
+     <p><img src="https://img.soaer.com/blog/7.jpg" alt=""></p> 
      <h3>优点</h3> 
      <pre><code>这种方式即使出现第一种情况那么2和3号服务器上面也保存的1号的Session信息，当出现故障负载均衡服务器把1号用户导流到2和3号服务器上面时，服务器也会发现有1号用户的安全上下文，能够继续访问而且不需要重新登录。
 </code></pre> 
@@ -168,7 +168,7 @@ var blogId="47"
 </code></pre> 
      <h2>服务器共享Session</h2> 
      <p>服务器共享Session信息：</p> 
-     <p><img src="http://img.soaer.com/blog/8.jpg" alt=""></p> 
+     <p><img src="https://img.soaer.com/blog/8.jpg" alt=""></p> 
      <h3>优点</h3> 
      <pre><code>每个用户的Session信息都会被存储到应用之外的另外一台服务器（可能是数据库，也可能是KV存储服务），这样应用服务器就不用存储每个用户的Session信息了，节约了很大的内存开销。
 当不同应用服务器需要用到Session信息的时候就去找共享Session服务器来获取信息。
