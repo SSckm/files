@@ -1,0 +1,645 @@
+<!doctype html>
+<html lang="en">
+ <!--<![endif]-->
+ <!-- BEGIN HEAD -->
+ <head> 
+  <meta charset="utf-8"> 
+  <!-- 博客标题 --> 
+  <title>排序算法、常见算法 - Sunny个人博客</title> 
+  <meta http-equiv="X-UA-Compatible" content="IE=edge"> 
+  <meta name="keywords" content="排序算法、常见算法、动态规划、链表"> 
+  <meta name="description" content="排序算法、常见算法、动态规划、链表"> 
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+  <meta content="width=device-width, initial-scale=1" name="viewport"> 
+  <meta content="" name="author"> 
+  <!-- javascript初始化区域 --> 
+  <link href="https://blog.soaer.com/global/plugins/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css"> 
+  <link href="https://blog.soaer.com/global/plugins/simple-line-icons/simple-line-icons.min.css" rel="stylesheet" type="text/css"> 
+  <link href="https://css.soaer.com/global/plugins/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css"> 
+  <link href="https://css.soaer.com/global/css/index.components.min.css" rel="stylesheet" id="style_components" type="text/css"> 
+  <link href="https://css.soaer.com/layouts/layout4/css/layout.min.css" rel="stylesheet" type="text/css"> 
+  <link href="https://css.soaer.com/layouts/layout4/css/themes/default.min.css" rel="stylesheet" type="text/css" id="style_color"> 
+  <link href="https://css.soaer.com/layouts/layout4/css/md.css" rel="stylesheet" type="text/css"> 
+  <link href="https://css.soaer.com/apps/css/todo-2.min.css" rel="stylesheet" type="text/css"> 
+  <link href="https://css.soaer.com/pages/css/profile.min.css" rel="stylesheet" type="text/css"> 
+  <script type="text/javascript">
+var blogKey="2de63fe3777e4cb4b95b219c8def671f" 
+var userName="Sunny" 
+var blogId="59" 
+
+</script>
+ </head> 
+ <body class="page-container-bg-solid page-header-fixed page-sidebar-closed-hide-logo"> 
+  <!-- BEGIN HEADER --> 
+  <div class="page-header navbar navbar-fixed-top"> 
+   <!-- BEGIN HEADER INNER --> 
+   <div class="page-header-inner "> 
+    <div class="page-top"> 
+     <div class="top-menu"> 
+      <ul class="nav navbar-nav pull-right"> 
+       <li class="separator hide"></li> 
+       <li class="dropdown dropdown-extended dropdown-notification dropdown-dark" id="header_notification_bar"><a href="https://www.soaer.com" class="dropdown-toggle" data-close-others="true"> <i class="fa fa-home"></i> <span class="badge badge-success">首页</span></a> </li> 
+       <li class="separator hide"></li> 
+       <li class="dropdown dropdown-extended dropdown-inbox dropdown-dark" id="header_inbox_bar"><a href="https://tool.soaer.com" class="dropdown-toggle" data-close-others="true"> <i class="fa fa-cog"></i> <span class="badge badge-danger">工具</span> </a></li> 
+       <li class="separator hide"></li> 
+       <li class="dropdown dropdown-extended dropdown-tasks dropdown-dark" id="header_task_bar"><a href="https://blog.soaer.com" class="dropdown-toggle" data-close-others="true"> <i class="fa fa-file"></i> <span class="badge badge-primary">博客</span></a> </li> 
+      </ul> 
+     </div> 
+     <!-- END TOP NAVIGATION MENU --> 
+    </div> 
+    <!-- END PAGE TOP --> 
+   </div> 
+   <!-- END HEADER INNER --> 
+  </div> 
+  <!-- END HEADER --> 
+  <!-- BEGIN HEADER & CONTENT DIVIDER --> 
+  <div class="clearfix"></div> 
+  <!-- END HEADER & CONTENT DIVIDER --> 
+  <!-- BEGIN CONTAINER --> 
+  <div class="page-container"> 
+   <!-- BEGIN SIDEBAR --> 
+   <div class="page-sidebar-wrapper"> 
+    <!-- BEGIN SIDEBAR --> 
+    <!-- DOC: Set data-auto-scroll="false" to disable the sidebar from auto scrolling/focusing --> 
+    <!-- DOC: Change data-auto-speed="200" to adjust the sub menu slide up/down speed --> 
+    <div class="page-sidebar navbar-collapse collapse"> 
+     <ul class="page-sidebar-menu   " data-keep-expanded="false" data-auto-scroll="true" data-slide-speed="200"> 
+      <div class="profile-sidebar"> 
+       <!-- PORTLET MAIN --> 
+       <div class="portlet light profile-sidebar-portlet bordered"> 
+        <!-- SIDEBAR USERPIC --> 
+        <div class="profile-userpic"> 
+         <img src="https://img.soaer.com/pages/media/profile/sunny.jpg" class="img-responsive" alt=""> 
+        </div> 
+        <!-- 博客作者名称 --> 
+        <div class="profile-usertitle"> 
+         <div class="profile-usertitle-name">
+          Sunny
+         </div> 
+        </div> 
+       </div> 
+       <div id="ad"> 
+        <!-- <img  width="100%" src="http://f12.baidu.com/it/u=292560263,2120845313&fm=76"> --> 
+       </div> 
+       <br> 
+       <div class="portlet light bordered"> 
+        <div> 
+         <!-- 阅读次数 --> 
+         <div class="margin-top-10 profile-desc-link" id="blogReadNum"></div> 
+         <!-- 创建时间 --> 
+         <div class="margin-top-10 profile-desc-link" id="blogCreateDate">
+          创建日期：2018年7月6日
+         </div> 
+        </div> 
+        <br> 
+        <div id="lastBlogList"> 
+         <h4 class="profile-desc-title">最近发表的文章</h4> 
+         <!-- <span class="profile-desc-text"> Lorem ipsum dolor sit amet diam nonummy nibh dolore. </span> --> 
+         <!-- 最新发表的博客列表 --> 
+        </div> 
+       </div> 
+       <!-- END PORTLET MAIN --> 
+      </div> 
+     </ul> 
+     <!-- END SIDEBAR MENU --> 
+    </div> 
+    <!-- END SIDEBAR --> 
+   </div> 
+   <!-- END SIDEBAR --> 
+   <!-- BEGIN CONTENT --> 
+   <!-- END QUICK SIDEBAR --> 
+   <div class="page-content-wrapper"> 
+    <div class="page-content"> 
+     <div class="page-head"> 
+      <!-- BEGIN PAGE TITLE --> 
+      <!-- 博客标题 --> 
+      <div id="page-title"> 
+       <h1>排序算法、常见算法</h1> 
+      </div> 
+      <!-- END PAGE TITLE --> 
+      <!-- BEGIN PAGE TOOLBAR --> 
+      <!-- END PAGE TOOLBAR --> 
+     </div> 
+     <br> 
+     <!-- 博客标签列表 --> 
+     <div class="noteAd">
+      <a href="javascript:;" class="btn btn-circle red disabled">原创</a>
+      <a href="javascript:;" class="btn btn-circle green disabled">标签</a>
+      <a href="javascript:;" class="btn btn-circle green">排序</a>
+      <a href="javascript:;" class="btn btn-circle green">算法</a>
+      <a href="javascript:;" class="btn btn-circle green">动态规划</a>
+      <a href="javascript:;" class="btn btn-circle green">链表</a>
+     </div> 
+     <h1>算法大全（一）</h1> 
+     <h2>排序算法</h2> 
+     <h3>冒泡排序</h3> 
+     <pre><code>package com.jvm.algorithm;
+
+import java.util.Arrays;
+
+public class Maopao {
+	public static void bubbleSort(int[] arr) {
+		int temp;
+		for (int i = 0; i &lt; arr.length - 1; i++) {
+			for (int j = 0; j &lt; arr.length - i - 1; j++) {
+				if (arr[j + 1] &lt; arr[j]) {
+					temp = arr[j];
+					arr[j] = arr[j + 1];
+					arr[j + 1] = temp;
+				}
+			}
+		}
+	}
+
+	public static void main(String[] args) {
+		int arr[] = new int[] { 1, 6, 2, 2, 5 };
+		Maopao.bubbleSort(arr);
+		System.out.println(Arrays.toString(arr));
+	}
+}
+</code></pre> 
+     <h3>插入排序</h3> 
+     <pre><code>package com.jvm.algorithm;
+
+import java.util.Arrays;
+public class Charu {
+	
+	public static void insertSort(int[] a) {
+		int i, j, insertNote;
+		for (i = 1; i &lt; a.length; i++) {
+			insertNote = a[i];
+			j = i - 1;
+			while (j &gt;= 0 &amp;&amp; insertNote &lt; a[j]) {
+				a[j + 1] = a[j];
+				j--;
+			}
+			a[j + 1] = insertNote;
+		}
+	}
+
+	public static void main(String[] args) {
+		int a[] = { 38, 65, 97, 76, 13, 27, 49 };
+		insertSort(a);
+		System.out.println(Arrays.toString(a));
+	}
+}
+</code></pre> 
+     <h3>快速排序</h3> 
+     <pre><code>package com.jvm.algorithm;
+
+import java.util.Arrays;
+
+public class Kuaisu {
+	public static int partition(int[] array, int lo, int hi) {
+		int key = array[lo];
+		while (lo &lt; hi) {
+			while (array[hi] &gt;= key &amp;&amp; hi &gt; lo) {
+				hi--;
+			}
+			array[lo] = array[hi];
+			while (array[lo] &lt;= key &amp;&amp; hi &gt; lo) {
+				lo++;
+			}
+			array[hi] = array[lo];
+		}
+		array[hi] = key;
+		return hi;
+	}
+
+	public static void sort(int[] array, int lo, int hi) {
+		if (lo &gt;= hi) {
+			return;
+		}
+		int index = partition(array, lo, hi);
+		sort(array, lo, index - 1);
+		sort(array, index + 1, hi);
+	}
+
+	public static void main(String[] args) {
+		int[] a = { 1, 2, 4, 5, 7, 4, 5, 3, 9, 0 };
+		System.out.println(Arrays.toString(a));
+		sort(a, 0, a.length - 1);
+		System.out.println(Arrays.toString(a));
+	}
+
+}
+</code></pre> 
+     <h3>选择排序</h3> 
+     <pre><code>package com.jvm.algorithm;
+
+public class Xuanze {
+
+	public static void xuanze(int[] arr) {
+		for (int i = 0; i &lt; arr.length - 1; i++) {
+			int k = i;
+			for (int j = k + 1; j &lt; arr.length; j++) {
+				if (arr[j] &lt; arr[k]) {
+					k = j;
+				}
+			}
+			if (i != k) {
+				int temp = arr[i];
+				arr[i] = arr[k];
+				arr[k] = temp;
+			}
+		}
+	}
+
+	public static void main(String[] args) {
+		int[] arr = { 1, 3, 2, 45, 65, 33, 12 };
+		System.out.println("交换之前：");
+		for (int num : arr) {
+			System.out.print(num + " ");
+		}
+		xuanze(arr);
+		System.out.println();
+		System.out.println("交换后：");
+		for (int num : arr) {
+			System.out.print(num + " ");
+		}
+	}
+
+}
+</code></pre> 
+     <h3>最大公共字串长度</h3> 
+     <pre><code>package com.jvm.algorithm.dongtaiguihua;
+
+public class ZuiChangGonggongzifuchuan {
+	public static int findLongest(String A, int n, String B, int m) {
+		int[][] dp = new int[n][m];
+		dp[0][0] = A.charAt(0) == B.charAt(0) ? 1 : 0;
+
+		for (int i = 1; i &lt; n; i++) {
+			if (A.charAt(i) == B.charAt(0))
+				dp[i][0] = 1;
+			else
+				dp[i][0] = 0;
+		}
+
+		for (int j = 1; j &lt; m; j++) {
+			if (A.charAt(0) == B.charAt(j)) {
+				dp[0][j] = 1;
+			} else {
+				dp[0][j] = 0;
+			}
+		}
+
+		for (int i = 1; i &lt; n; i++) {
+			for (int j = 1; j &lt; m; j++) {
+				if (A.charAt(i) == B.charAt(j)) {
+					dp[i][j] = dp[i - 1][j - 1] + 1;
+				} else {
+					dp[i][j] = 0;
+				}
+			}
+		}
+		int max = 0;
+		for (int i = 0; i &lt; n; i++)
+			for (int j = 0; j &lt; m; j++) {
+				if (dp[i][j] &gt; max) {
+					max = dp[i][j];
+				}
+			}
+		return max;
+	}
+
+	public static void main(String[] args) {
+		String s1 = "DADASFewewerwasdfasdf";
+		String s2 = "DA22DASFewe5werwasd44fasdf";
+		System.out.println(findLongest(s1, s1.length(), s2, s2.length()));
+	}
+}
+
+</code></pre> 
+     <h3>单链表的反转</h3> 
+     <pre><code>package com.jvm.algorithm.danlianbiao;
+
+public class Fanzhuan {
+
+	public static class Node {
+		private int index;
+		private Node next;
+
+		public Node(int index, Node next) {
+			this.index = index;
+			this.next = next;
+		}
+
+		public Node(int index) {
+			this.index = index;
+		}
+
+		public int getIndex() {
+			return index;
+		}
+
+		public void setIndex(int index) {
+			this.index = index;
+		}
+
+		public Node getNext() {
+			return next;
+		}
+
+		public void setNext(Node next) {
+			this.next = next;
+		}
+	}
+
+	public static Node reverse(Node head) {
+		if (head == null)
+			return head;
+		Node pre = head;
+		Node cur = head.getNext();
+		Node tmp;
+		while (cur != null) {
+			tmp = cur.getNext();
+			cur.setNext(pre);
+			pre = cur;
+			cur = tmp;
+		}
+		head.setNext(null);
+		return pre;
+	}
+
+	public static void main(String[] args) {
+		Node head = new Node(0);
+		Node node1 = new Node(1);
+		Node node2 = new Node(2);
+		Node node3 = new Node(3);
+
+		head.setNext(node1);
+		node1.setNext(node2);
+		node2.setNext(node3);
+		Node h = head;
+		while (null != h) {
+			System.out.print(h.getIndex() + " ");
+			h = h.getNext();
+		}
+		head = reverse(head);
+		while (null != head) {
+			System.out.print(head.getIndex() + " ");
+			head = head.getNext();
+		}
+	}
+}
+</code></pre> 
+     <h3>二分查找</h3> 
+     <pre><code>package com.jvm.algorithm.chazhao;
+
+public class Erfengchazhao {
+
+	
+	//递归方式
+	public static int recursionBinarySearch(int[] arr, int key, int low, int high) {
+		if (key &lt; arr[low] || key &gt; arr[high] || low &gt; high) {
+			return -1;
+		}
+
+		int middle = (low + high) / 2;
+		if (arr[middle] &gt; key) {
+			return recursionBinarySearch(arr, key, low, middle - 1);
+		} else if (arr[middle] &lt; key) {
+			return recursionBinarySearch(arr, key, middle + 1, high);
+		} else {
+			return middle;
+		}
+	}
+
+	
+	//非递归
+	public static int commonBinarySearch(int[] arr, int key) {
+		int low = 0;
+		int high = arr.length - 1;
+		int middle = 0;
+		if (key &lt; arr[low] || key &gt; arr[high] || low &gt; high) {
+			return -1;
+		}
+
+		while (low &lt;= high) {
+			middle = (low + high) / 2;
+			if (arr[middle] &gt; key) {
+				high = middle - 1;
+			} else if (arr[middle] &lt; key) {
+				low = middle + 1;
+			} else {
+				return middle;
+			}
+		}
+		return -1;
+	}
+	
+	
+	public static void main(String[] args) {
+		int[] arr = {4,6,9,12,35,67,89,222,444,666};
+		System.out.println(commonBinarySearch(arr, 35));
+		System.out.println(recursionBinarySearch(arr, 35, 0, arr.length - 1));
+	}
+}
+</code></pre> 
+     <h3>单链表找中间节点</h3> 
+     <pre><code>package com.jvm.algorithm.danlianbiao;
+
+public class FindMod {
+
+	public static class Node {
+		private int index;
+		private Node next;
+
+		public Node(int index, Node next) {
+			this.index = index;
+			this.next = next;
+		}
+
+		public Node(int index) {
+			this.index = index;
+		}
+
+		public int getIndex() {
+			return index;
+		}
+
+		public void setIndex(int index) {
+			this.index = index;
+		}
+
+		public Node getNext() {
+			return next;
+		}
+
+		public void setNext(Node next) {
+			this.next = next;
+		}
+	}
+
+	public static Node findMid(Node head) {
+
+		if (head == null) {
+			return null;
+		}
+
+		if (head.next == null) {
+			return null;
+		}
+
+		if (head.next.next == null) {
+			return null;
+		}
+
+		Node p1 = head.next;
+		Node p2 = head.next.next;
+		while (p2 != null &amp;&amp; p2.next != null &amp;&amp; p2.next.next != null) {
+			p1 = p1.next;
+			p2 = p2.next.next;
+		}
+		return p1;
+	}
+
+	public static void main(String[] args) {
+		Node node0 = new Node(0);
+		Node node1 = new Node(1);
+		Node node2 = new Node(2);
+		Node node3 = new Node(3);
+		Node node4 = new Node(4);
+		Node node5 = new Node(5);
+		Node node6 = new Node(6);
+		Node node7 = new Node(7);
+		Node node8 = new Node(8);
+		Node node9 = new Node(9);
+		node0.setNext(node1);
+		node1.setNext(node2);
+		node2.setNext(node3);
+		node3.setNext(node4);
+		node4.setNext(node5);
+		node5.setNext(node6);
+		node6.setNext(node7);
+		node7.setNext(node8);
+		node8.setNext(node9);
+		System.out.println(findMid(node0).index);
+	}
+}
+</code></pre> 
+     <p>&nbsp;</p>  
+     <!-- --------------------MarkDown文件去也--------------------------- --> 
+     <!-- --------------------------------------------------------- --> 
+     <br> 
+     <div class="note note-info"> 
+      <div align="left"> 
+       <a href="javascript:;" class="btn btn-circle green disabled">上一篇</a>&nbsp;&nbsp; 
+       <a href="https://blog.soaer.com/1/3eac1f9d9045410fb249dbc81cff6b22.html" id="recommended1">实战分析Https工作原理（TCP三次握手+TLS/SSL协议）</a> 
+      </div> 
+      <br> 
+      <div align="left"> 
+       <a href="javascript:;" class="btn btn-circle green disabled">下一篇</a>&nbsp;&nbsp; 
+       <a href="" id="recommended2">没有了</a> 
+      </div> 
+     </div> 
+     <!-- 评论区 --> 
+     <div class="row"> 
+      <div class="col-md-12"> 
+       <!-- BEGIN TODO SIDEBAR --> 
+       <div class="todo-ui"> 
+        <!-- END TODO SIDEBAR --> 
+        <!-- BEGIN TODO CONTENT --> 
+        <div class="todo-content"> 
+         <div class="portlet light bordered"> 
+          <!-- PROJECT HEAD --> 
+          <!-- end PROJECT HEAD --> 
+          <div class="portlet-body"> 
+           <div class="row"> 
+            <div class="todo-tasklist-devider"></div> 
+            <div class="col-md-12 col-sm-8"> 
+             <form class="form-horizontal" id="addComments"> 
+              <!-- TASK HEAD --> 
+              <div class="form"> 
+               <div class="form-group"> 
+                <div class="col-md-8 col-sm-8"> 
+                 <div class="todo-taskbody-user"> 
+                  <span class="todo-username pull-left" id="commentsName"></span> 
+                 </div> 
+                </div> 
+               </div> 
+               <!-- TASK DESC --> 
+               <div class="form-group"> 
+                <div class="col-md-12"> 
+                 <textarea class="form-control todo-taskbody-taskdesc" rows="8" placeholder="文明上网" name="content" id="commentsContent"></textarea> 
+                </div> 
+               </div> 
+               <div id="sendCommentsErrorMessage"></div> 
+               <div class="form-actions right todo-form-actions"> 
+                <input type="button" class="btn btn-circle btn-sm green" id="ac" value="提交"> 
+               </div> 
+              </div> 
+             </form> 
+             <form class="form-horizontal" id="sendEmail" style="display: none;"> 
+              <!-- TASK HEAD  style="display:none;" --> 
+              <div class="form"> 
+               <div class="form-group"> 
+                <div class="col-md-12"> 
+                 <textarea class="form-control todo-taskbody-taskdesc" rows="1" name="email" id="sendMailContent" placeholder="邮箱验证，请输入邮箱号"></textarea> 
+                </div> 
+               </div> 
+               <div class="form-actions right todo-form-actions"> 
+                <input type="button" class="btn btn-circle btn-sm green" id="sdm" value="发送"> 
+               </div> 
+              </div> 
+              <div id="sendEmailErrorMessage"></div> 
+             </form> 
+             <form class="form-horizontal" id="validationEmail" style="display: none;"> 
+              <!-- TASK HEAD  style="display:none;" --> 
+              <div class="form"> 
+               <div class="form-group"> 
+                <div class="col-md-12"> 
+                 <textarea class="form-control todo-taskbody-taskdesc" rows="3" name="cid" placeholder="请输入邮箱里面的内容，验证一次再次评论无需验证"></textarea> 
+                </div> 
+               </div> 
+               <div class="form-actions right todo-form-actions"> 
+                <input type="button" class="btn btn-circle btn-sm green" id="vm" value="验证"> 
+               </div> 
+               <div id="validationEmailErrorMessage"></div> 
+              </div> 
+             </form> 
+             <div class="tabbable-line"> 
+              <div class="tab-content"> 
+               <div class="tab-pane active" id="tab_1"> 
+                <!-- TASK COMMENTS --> 
+                <div class="form-group"> 
+                 <div class="col-md-12"> 
+                  <ul class="media-list" id="commentsList"> 
+                   <!-- 单个评论区 --> 
+                   <!-- 单个评论区结束 --> 
+                  </ul> 
+                 </div> 
+                </div> 
+               </div> 
+              </div> 
+             </div> 
+            </div> 
+           </div> 
+          </div> 
+         </div> 
+        </div> 
+        <!-- END TODO CONTENT --> 
+       </div> 
+      </div> 
+      <!-- END PAGE CONTENT--> 
+     </div> 
+    </div> 
+   </div> 
+  </div> 
+  <script src="https://js.soaer.com/global/plugins/jquery.min.js" type="text/javascript"></script> 
+  <script src="https://js.soaer.com/global/plugins/jquery-cookiebar/jquery.cookieBar.min.js" type="text/javascript"></script> 
+  <script src="https://js.soaer.com/global/plugins/bootstrap/js/bootstrap.min.js" type="text/javascript"></script> 
+  <script src="https://js.soaer.com/global/plugins/js.cookie.min.js" type="text/javascript"></script> 
+  <script src="https://js.soaer.com/global/plugins/jquery-slimscroll/jquery.slimscroll.min.js" type="text/javascript"></script> 
+  <script src="https://js.soaer.com/global/plugins/jquery.blockui.min.js" type="text/javascript"></script> 
+  <script src="https://js.soaer.com/global/plugins/bootstrap-switch/js/bootstrap-switch.min.js" type="text/javascript"></script> 
+  <script src="https://js.soaer.com/global/scripts/app.min.js" type="text/javascript"></script> 
+  <script src="https://js.soaer.com/layouts/layout4/scripts/layout.min.js" type="text/javascript"></script> 
+  <script src="https://js.soaer.com/global/plugins/jquery.base64.js" type="text/javascript"></script> 
+  <script src="https://js.soaer.com/layouts/global/scripts/quick-sidebar.min.js" type="text/javascript"></script> 
+  <script src="https://js.soaer.com/global/plugins/js.cookie.min.js" type="text/javascript"></script> 
+  <script src="https://js.soaer.com/layouts/global/scripts/quick-nav.min.js" type="text/javascript"></script> 
+  <script src="https://js.soaer.com/operate/blog.min.js" type="text/javascript"></script>   
+ </body>
+</html>
