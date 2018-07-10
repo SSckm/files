@@ -1,0 +1,53 @@
+<!doctype html>
+<html>
+<head>
+<meta charset='UTF-8'><meta name='viewport' content='width=device-width initial-scale=1'>
+<title>Maven常用命令.md</title></head>
+<body><h2>说明</h2>
+<pre><code>此文主要介绍maven的安装使用已经常用的命令
+</code></pre>
+<h2>安装</h2>
+<p>java的安装就不在这里说了。</p>
+<pre><code>下载地址：http://maven.apache.org/download.cgi
+</code></pre>
+<h2>配置环境变量</h2>
+<pre><code>这里编辑用户目录的.profile文件，编辑完成后执行 source .profile
+PATH=&quot;$HOME/bin:$HOME/.local/bin:$PATH&quot;
+MAVEN_HOME=/opt/apache-maven-3.2.5
+export PATH=${PATH}:${MAVEN_HOME}/bin
+</code></pre>
+<h2>测试</h2>
+<pre><code>mvn -v
+Apache Maven 3.2.5 (12a6b3acb947671f09b81f49094c53f426d8cea1; 2014-12-15T01:29:23+08:00)
+Maven home: /opt/apache-maven-3.2.5
+Java version: 1.8.0_101, vendor: Oracle Corporation
+Java home: /opt/jdk1.8.0_101/jre
+Default locale: en_US, platform encoding: ANSI_X3.4-1968
+OS name: &quot;linux&quot;, version: &quot;4.4.0-109-generic&quot;, arch: &quot;amd64&quot;, family: &quot;unix&quot;
+安装成功
+</code></pre>
+<h2>命令</h2>
+<h3>生成eclipse文件</h3>
+<pre><code>mvn eclipse:eclipse
+</code></pre>
+<h2>清除target下面的文件</h2>
+<pre><code>mvn clean
+</code></pre>
+<h2>编译项目</h2>
+<pre><code>mvn compile
+</code></pre>
+<h2>打包</h2>
+<pre><code>mvn package
+</code></pre>
+<h2>打包跳过测试代码</h2>
+<pre><code>mvn clean install -Dmaven.test.skip=true
+</code></pre>
+<h2>拷贝依赖jar包到指定目录</h2>
+<pre><code>mvn dependency:copy-dependencies -DoutputDirectory=WebContent/WEB-INF/lib  -DincludeScope=runtime
+</code></pre>
+<h2>安装jar包</h2>
+<pre><code>mvn install:install-file -DgroupId=&lt;groupId&gt; -DartifactId=&lt;artifactId&gt; -Dversion=1.0.0 -Dpackaging=jar -Dfile=jar包地址
+</code></pre>
+<p></p>
+</body>
+</html>

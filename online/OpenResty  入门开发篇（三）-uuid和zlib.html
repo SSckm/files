@@ -1,0 +1,76 @@
+<!doctype html>
+<html>
+<head>
+<meta charset='UTF-8'><meta name='viewport' content='width=device-width initial-scale=1'>
+<title>OpenResty  入门开发篇（三）-uuid和zlib的使用.md</title></head>
+<body><h2>说明</h2>
+<pre lang='undefined'>
+此篇文章主要针对OpenResty中uuid的使用以及zlib使用，uuid会有场景用到，比如生成唯一标示，广告系统中生成竞价ID等等都会用到uuid的接口。zlib主要用于在上游服务器返回到OpenResty的时候 如果是压缩的数据，那么需要解压缩，这个时候就会用到zlib
+</pre>
+<h2>需要安装uuid-dev</h2>
+<pre lang='undefined'>
+sudo apt-get install uuid-dev
+</pre>
+<h2>uuid生成</h2>
+<p>直接上代码</p>
+<pre lang='undefined'>
+local ffi = require &#39;ffi&#39;
+local uuid_key = &quot;uuid&quot;
+local _M = {}
+
+ffi.cdef[[
+    typedef unsigned char uuid_t[16];
+    void uuid_generate(uuid_t out);
+    void uuid_unparse(const uuid_t uu, char *out);
+]]
+
+local uuid = ffi.load(&#39;libuuid&#39;)
+function _M.get_uuid()
+    local result
+    if uuid then
+        local uuid_t   = ffi.new(&quot;uuid_t&quot;)
+        local uuid_out = ffi.new(&quot;char[64]&quot;)
+        uuid.uuid_generate(uuid_t)
+        uuid.uuid_unparse(uuid_t, uuid_out)
+        result = ffi.string(uuid_out)
+    end
+    return string.gsub(result, &quot;-&quot;, &quot;&quot;);
+end
+
+return _M
+</pre>
+<p></p>
+<h2>下载lua-zlib</h2>
+<pre lang='undefined'>
+下载地址：https://github.com/brimworks/lua-zlib
+</pre>
+<h2>安装cmake</h2>
+<pre lang='undefined'>
+sudo apt-get install cmake
+</pre>
+<h2>编译安装</h2>
+<pre lang='undefined'>
+cmake -DLUA_INCLUDE_DIR=$OR_HOME/luajit/include/luajit-2.1 -DLUA_LIBRARIES=$OR_HOME/luajit/lib -DUSE_LUAJIT=ON -DUSE_LUA=OF
+
+make &amp;&amp; make install
+</pre>
+<p>注意：$OR_HOME为OpenResty的安装目录， 编译安装需要安装cmake依赖</p>
+<h2>使用方式</h2>
+<pre lang='undefined'>
+local function unzip_data(resp)
+    local is_gzip = resp.header[&#39;Content-Encoding&#39;]
+    local body = resp.body
+    if nil == body or &quot;&quot; == body then
+        return nil
+    end
+    if &quot;gzip&quot; == is_gzip then
+        local gzip = zlib.inflate()
+        return gzip(body)
+    else
+        return body
+    end
+end
+</pre>
+<p>这样上游服务器返回的数据如果是压缩的情况下就可以得到明文数据了。</p>
+</body>
+</html>

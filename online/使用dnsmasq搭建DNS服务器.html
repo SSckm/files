@@ -1,0 +1,74 @@
+<!doctype html>
+<html>
+<head>
+<meta charset='UTF-8'><meta name='viewport' content='width=device-width initial-scale=1'>
+<title>使用dnsmasq搭建DNS服务器.md</title></head>
+<body><h2>准备工作</h2>
+<h2>服务器</h2>
+<pre lang='undefined'>
+系统：Ubuntu
+</pre>
+<h2>安装dnsmasq</h2>
+<pre lang='undefined'>
+sudo apt-get install dnsmasq
+</pre>
+<h2>添加配置文件</h2>
+<pre lang='undefined'>
+1.在用户目录下面添加配置文件目录
+mkdir dnsmasq
+cd dnsmasq
+2.新建dnsmasq.conf文件
+touch dnsmasq.conf
+3.新建dnsmasq-resolv.conf文件
+touch dnsmasq-resolv.conf
+4.新建dnsmasq.hosts文件
+touch dnsmasq.hosts
+</pre>
+<h2>dnsmasq.conf文件内容</h2>
+<pre lang='undefined'>
+cache-size=10000
+port=5353
+resolv-file=/home/appops/dnsmasq/dnsmasq-resolv.conf
+addn-hosts=/home/appops/dnsmasq/dnsmasq.hosts
+log-queries
+log-facility=/home/appops/dnsmasq/dnsmasq.log
+local-ttl=600
+conf-dir=/home/appops/dnsmasq/dnsmasq.d
+</pre>
+<p>说明：cache-size为缓存的条目数，port为dns服务器监听的端口号（普通用户不能使用53端口，受保护端口）</p>
+<p>也可以直接拷贝/etc/dnsmasq.conf文件，这个文件里面有更为详细的配置。这里提供最简配置。</p>
+<h2>dnsmasq-resolv.conf文件内容</h2>
+<pre lang='undefined'>
+nameserver 8.8.8.8
+</pre>
+<p>说明：8.8.8.8是谷歌提供的免费的DNS服务器</p>
+<h2>dnsmasq.hosts文件内容</h2>
+<pre lang='undefined'>
+223.221.11.20  cc.soaer.com
+223.221.11.20  bb.soaer.com
+223.221.11.20  dd.soaer.com
+</pre>
+<h2>新建文件夹</h2>
+<pre lang='undefined'>
+mkdir dnsmasq.d
+</pre>
+<h2>文件列表</h2>
+<pre lang='undefined'>
+hadoop@soaer:~/dnsmasq$ ls
+dnsmasq.conf  dnsmasq.d  dnsmasq.hosts  dnsmasq.log  dnsmasq-resolv.conf
+</pre>
+<h2>启动dnsmasq</h2>
+<pre lang='undefined'>
+/usr/sbin/dnsmasq --conf-file=dnsmasq/dnsmasq.conf
+</pre>
+<h2>nginx配置DNS服务器</h2>
+<pre lang='undefined'>
+http {
+  include mime.types;
+  resolver 127.0.0.1:5353 valid=30s;
+  include lua/resty/conf/*.conf;
+}
+</pre>
+<p>这样就配置好了可以使用了。</p>
+</body>
+</html>

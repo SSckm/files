@@ -1,0 +1,87 @@
+<!doctype html>
+<html>
+<head>
+<meta charset='UTF-8'><meta name='viewport' content='width=device-width initial-scale=1'>
+<title>SSL免费证书申请-Let&#39;s Encrypt.md</title></head>
+<body><h2>简介</h2>
+<pre><code>由于最近在搞自己的个人技术网站，而收费的SSL证书对于我们个人站长来说又太贵，所以就申请了一下Let&#39;s Encrypt的免费证书。下面就线上申请和本地申请两种模式讲解一下生成证书的步骤以及方式
+</code></pre>
+<h2>在线申请</h2>
+<pre><code>打开网页：https://zerossl.com/
+</code></pre>
+<h3>第一步</h3>
+<pre><code>点击 ONLINE TOOLS
+</code></pre>
+<p><img src='https://img.soaer.com/blog/22.png' alt='' /></p>
+<h3>第二步</h3>
+<pre><code>点击：START
+</code></pre>
+<p><img src='https://img.soaer.com/blog/23.png' alt='' /></p>
+<h3>第三步</h3>
+<pre><code>填写自己的邮箱和域名，注意域名不支持通配符。比如不支持*aaa.com,但可以支持多个。邮箱是选填。
+最下面的两个要选择,点击 NEXT
+</code></pre>
+<p><img src='https://img.soaer.com/blog/24.png' alt='' /></p>
+<h3>第四步</h3>
+<pre><code>这里我选择的是NO，可根据自己选择
+</code></pre>
+<p><img src='https://img.soaer.com/blog/25.png' alt='' /></p>
+<h3>第五步</h3>
+<pre><code>点击下载文件，下载生成好的文件。点击NEXT
+</code></pre>
+<p><img src='https://img.soaer.com/blog/26.png' alt='' /></p>
+<h3>第六步</h3>
+<pre><code>下载生成的文件，点击NEXT
+</code></pre>
+<p><img src='https://img.soaer.com/blog/27.png' alt='' /></p>
+<h3>第七步</h3>
+<pre><code>这个步骤是验证网站，点击下载文件，然后把文件放到根目录的 .well-known/acme-challenge/这个文件夹下面，这两个文件夹需要自己手动创建。而且这个文件每次生成的都不一样
+</code></pre>
+<p><img src='https://img.soaer.com/blog/28.png' alt='' /></p>
+<h3>第八步</h3>
+<pre><code>第七步验证完网站并成功以后，就会生成两个文件，都是.txt结尾的文件。一个是domain.key.txt, 一个是domain.crt.txt, 需要改下后缀名，分别文.key和.crt.然后配置到web服务器就可以了。至此成功申请到免费的SSL证书。nginx配置不在此说了。
+</code></pre>
+<p></p>
+<h2>本地生成</h2>
+<h3>环境介绍</h3>
+<pre><code>Ubuntu 16.04
+</code></pre>
+<h3>GitHub地址</h3>
+<pre><code>https://github.com/do-know/Crypt-LE
+克隆到本地
+</code></pre>
+<h3>安装依赖组件</h3>
+<pre><code>sudo apt-get install make gcc libssl-dev liblocal-lib-perl cpanminus
+</code></pre>
+<h3>安装Crypt::LE</h3>
+<pre><code>cpanm Crypt::LE
+cpan -i Crypt::LE
+perl Makefile.PL
+make
+make test
+make install
+</code></pre>
+<h2>命令生成证书</h2>
+<p>注意：在执行命令的时候如果不加上--live的话所有的命令都相当于在测试系统中生成的，浏览器是不信任测试系统的证书的，所以在生成正式环境的证书的时候需要加上--live选项</p>
+<pre><code>le.pl --key account.key --email &quot;my@email.address&quot; --csr domain.csr --csr-key domain.key --crt domain.crt --domains  &quot;www.domain.ext,domain.ext&quot; --generate-missing --live
+</code></pre>
+<p>说明：generate-missing的意思是你丢掉了所有的文件，包括私钥证书请求文件等。会重新生成</p>
+<p>执行完命令后会有一下的日志输出，此时需要验证你的网站了。在网站的根目录创建：.well-known/acme-challenge/文件夹，然后创建日志提示的文件的名称，在这里文件名称为：G8mjTsaU1ks6yS5v7uEKGUQXHHPqj0rbu2vvxHLlktc， 在这个文件里面输入：G8mjTsaU1ks6yS5v7uEKGUQXHHPqj0rbu2vvxHLlktc.GFGRhimi-_yO_XP1LNO7sa3rb1BW752yGUB0PySF0nc内容，然后点击enter.</p>
+<pre><code>2018/01/29 11:15:32 [ ZeroSSL Crypt::LE client v0.29 started. ]
+2018/01/29 11:15:32 Generating a new account key
+2018/01/29 11:15:32 Saving generated account key into account.key
+2018/01/29 11:15:32 Generating a new CSR for domains www.soaer.com
+2018/01/29 11:15:32 New CSR will be based on a generated key
+2018/01/29 11:15:34 Saving a new CSR into domain.csr
+2018/01/29 11:15:34 Saving a new CSR key into domain.key
+2018/01/29 11:15:35 Registering the account key
+2018/01/29 11:15:36 The key has been successfully registered. ID: 5461161
+2018/01/29 11:15:36 Make sure to check TOS at https://letsencrypt.org/documents/LE-SA-v1.2-November-15-2017.pdf
+2018/01/29 11:15:36 Current contact details: liuzhenx@hotmail.com
+Challenge for www.soaer.com requires:
+A file &#39;G8mjTsaU1ks6yS5v7uEKGUQXHHPqj0rbu2vvxHLlktc&#39; in &#39;/.well-known/acme-challenge/&#39; with the text: G8mjTsaU1ks6yS5v7uEKGUQXHHPqj0rbu2vvxHLlktc.GFGRhimi-_yO_XP1LNO7sa3rb1BW752yGUB0PySF0nc
+When done, press &lt;Enter&gt;
+</code></pre>
+<p>OK，还是本地生成的快一点。</p>
+</body>
+</html>

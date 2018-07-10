@@ -1,0 +1,71 @@
+<!doctype html>
+<html>
+<head>
+<meta charset='UTF-8'><meta name='viewport' content='width=device-width initial-scale=1'>
+<title>设计模式</title></head>
+<body><p>设计模式大全（一）</p>
+<h3>静态内部类单例</h3>
+<pre><code>package com.jvm.shejimoshi.danli;
+
+public class StaticInnerSingleton {
+
+	private static class SingletonHolder {
+		private static StaticInnerSingleton instance = new StaticInnerSingleton();
+	}
+
+	public static StaticInnerSingleton getInstance() {
+		return SingletonHolder.instance;
+	}
+
+}
+</code></pre>
+<h3>枚举单例</h3>
+<pre><code>package com.jvm.shejimoshi.danli;
+
+public enum Enum {
+
+	INSTANCE;
+	public void sayHello() {
+	}
+}
+</code></pre>
+<h3>懒汉模式</h3>
+<pre><code>package com.jvm.shejimoshi.danli;
+
+public class LanHan {
+
+	private static LanHan intance = null;
+
+	private LanHan() {
+	}
+
+	public static LanHan getInstance() {
+		if (intance == null) {
+			synchronized (LanHan.class) {
+				if (intance == null) {
+					intance = new LanHan();
+				}
+			}
+		}
+		return intance;
+	}
+}
+</code></pre>
+<h3>饿汉模式</h3>
+<pre><code>package com.jvm.shejimoshi.danli;
+
+public class EHan {
+
+	private static EHan instance = new EHan();
+
+	private EHan() {
+	}
+
+	public static EHan getInstance() {
+		return instance;
+	}
+}
+</code></pre>
+<p>&nbsp;</p>
+</body>
+</html>

@@ -519,6 +519,115 @@ public class FindMod {
 	}
 }
 </code></pre> 
+<h3>读数据库生成树状菜单</h3>
+<pre><code>package com.bd;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class Mx {
+
+	public static class NodeDet {
+		private String name;
+		private int parentId;
+		private int id;
+		private List&lt;NodeDet&gt; chrids;
+		public NodeDet(int id, String name, int parentId) {
+			this.id = id;
+			this.name = name;
+			this.parentId = parentId;
+		}
+		public String getName() {
+			return name;
+		}
+		public void setName(String name) {
+			this.name = name;
+		}
+		public int getParentId() {
+			return parentId;
+		}
+		public void setParentId(int parentId) {
+			this.parentId = parentId;
+		}
+		public int getId() {
+			return id;
+		}
+		public void setId(int id) {
+			this.id = id;
+		}
+		public List&lt;NodeDet&gt; getChrids() {
+			return chrids;
+		}
+		public void setChrids(List&lt;NodeDet&gt; chrids) {
+			this.chrids = chrids;
+		}
+		@Override
+		public String toString() {
+			return &quot;NodeDet [name=&quot; + name + &quot;, parentId=&quot; + parentId + &quot;, id=&quot; + id + &quot;, chrids=&quot; + chrids + &quot;]&quot;;
+		}
+		
+	}
+
+	
+	public static List&lt;NodeDet&gt; getDbs() {
+		NodeDet nd1 = new NodeDet(1, &quot;a&quot;, 0);
+		NodeDet nd2 = new NodeDet(2, &quot;b&quot;, 0);
+		NodeDet nd3 = new NodeDet(3, &quot;c&quot;, 1);
+		NodeDet nd4 = new NodeDet(4, &quot;d&quot;, 2);
+		NodeDet nd5 = new NodeDet(5, &quot;e&quot;, 2);
+		NodeDet nd6 = new NodeDet(6, &quot;f&quot;, 3);
+		NodeDet nd7 = new NodeDet(7, &quot;g&quot;, 4);
+		NodeDet nd8 = new NodeDet(8, &quot;g&quot;, 10);
+
+		List&lt;NodeDet&gt; dbs = new ArrayList&lt;&gt;();
+		dbs.add(nd1);
+		dbs.add(nd2);
+		dbs.add(nd3);
+		dbs.add(nd4);
+		dbs.add(nd5);
+		dbs.add(nd6);
+		dbs.add(nd7);
+		dbs.add(nd8);
+		return dbs;
+	}
+	
+	
+	
+	public static void main(String[] args) {
+		List&lt;NodeDet&gt; dbs = getDbs();
+		List&lt;NodeDet&gt; listRoot = new ArrayList&lt;&gt;();
+		for (int i = 0; i &lt; dbs.size(); i++) {
+			if (dbs.get(i).getParentId() == 0) {
+				listRoot.add(dbs.get(i));
+			}
+		}
+		
+		for (int i = 0; i&lt; dbs.size(); i ++) {
+			dbs.get(i).setChrids(getChlids(dbs.get(i).getId(), dbs));
+		}
+		
+		System.out.println(listRoot.toString());
+	}
+
+	private static List&lt;NodeDet&gt; getChlids(int id, List&lt;NodeDet&gt; dbs) {
+		List&lt;NodeDet&gt; nodes = new ArrayList&lt;&gt;();
+		for (NodeDet nd: dbs) {
+			if (nd.getParentId() == id) {
+				nodes.add(nd);
+			}
+		}
+		
+		for (NodeDet nd : nodes) {
+			getChlids(nd.getId(), dbs);
+		}
+		
+		if (nodes.size() == 0) {
+			return null;
+		}
+		return nodes;
+	}
+}
+</code></pre>
      <p>&nbsp;</p>  
      <!-- --------------------MarkDown文件去也--------------------------- --> 
      <!-- --------------------------------------------------------- --> 

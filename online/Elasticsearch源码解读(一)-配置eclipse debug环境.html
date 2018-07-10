@@ -1,0 +1,85 @@
+<!doctype html>
+<html>
+<head>
+<meta charset='UTF-8'><meta name='viewport' content='width=device-width initial-scale=1'>
+<title>Elasticsearch源码解读(一)-配置eclipse debug环境.md</title></head>
+<body><h2>摘要</h2>
+<pre><code>本文主要讲解在eclipse环境中配置Elasticsearch源码环境，阅读Elasticsearch源码
+</code></pre>
+<h2>环境介绍</h2>
+<pre><code>操作系统  Mac os
+Elasticsearch 版本：elasticsearch-6.1.2
+java 版本：jdk-9.0.4.jdk
+gradle版本：gradle-4.4.1
+</code></pre>
+<h2>下载Elasticsearch源码</h2>
+<pre><code>下载地址：https://github.com/elastic/elasticsearch
+mkdir github
+cd github
+git clone https://github.com/elastic/elasticsearch.git
+推荐使用git clone方式下载源码，因为克隆下来后可以查看任何一个版本的源码，不然还要下载其他版本源码进行对比，比较麻烦
+</code></pre>
+<h2>切换版本</h2>
+<p>找到需要阅读源码的版本，然后checkout</p>
+<p><img src='http://img.soaer.com/blog/14.png' alt='' /></p>
+<pre><code>找到这个版本的提交版本号， 然后到elasticsearch的git目录
+比如我这里用的版本号是6.1.2的
+git checkout 5b1fea58947fad5b19398a12c50b49fbeebfb722
+这样就切换到这个版本的代码上。
+</code></pre>
+<h2>下载gradle</h2>
+<pre><code>很久以前ES还是maven管理的，现在改成了gradle，不是很适应
+下载地址：https://gradle.org/install/
+</code></pre>
+<h2>配置gradle环境变量</h2>
+<pre><code>export GRADLE_HOME=&quot;/Users/sunny/software/gradle-4.4.1&quot;
+export G2=&quot;$GRADLE_HOME/bin&quot;
+执行source .bash_profile
+测试一下  gradle -v
+</code></pre>
+<h2>配置Eclipse gradle插件</h2>
+<pre><code>help-&gt;Eclipse Marketplace
+输入buildship然后安装，如下图所示：
+</code></pre>
+<p><img src='http://img.soaer.com/blog/15.png' alt='' /></p>
+<h2>eclipse配置gradle</h2>
+<pre><code>在偏好设置里面配置一下gradle的安装路径
+</code></pre>
+<h2>eclipse支持</h2>
+<pre><code>cd $es_git_home(克隆下来的项目根路径)
+gradle eclipse (会很长时间，下载一些jar包)
+</code></pre>
+<h2>导入Eclipse</h2>
+<pre><code>在eclipse安装完成gradle插件后需要重新启动eclipse
+注意不能直接导入克隆下来的项目，需要导入gradle项目。
+import--&gt;Gradle--&gt;Existing Gradle project
+然后next 选择git clone的项目路径 就可以了。
+成功导入后如下图所示：
+</code></pre>
+<p><img src='http://img.soaer.com/blog/19.png' alt='' /></p>
+<h2>配置Eclipse启动参数</h2>
+<p><img src='http://img.soaer.com/blog/20.png' alt='' /></p>
+<pre><code>-Des.path.conf=&quot;/Users/sunny/software/elasticsearch-6.1.2/config&quot;
+-Des.path.home=&quot;/Users/sunny/software/elasticsearch-6.1.2&quot;
+-Des.path.data=&quot;/Users/sunny/software/elasticsearch-6.1.2/data&quot;
+-Dlog4j2.disable.jmx=true
+-Des.path.logs=&quot;/Users/sunny/software/elasticsearch-6.1.2/log&quot;
+</code></pre>
+<h2>启动Elasticsearch</h2>
+<p>直接点击Run</p>
+<pre><code>[2018-01-23T11:04:44,305][INFO ][o.e.n.Node               ] [] initializing ...
+[2018-01-23T11:04:44,474][INFO ][o.e.e.NodeEnvironment    ] [_ICupdp] using [1] data paths, mounts [[/ (/dev/disk1s1)]], net usable_space [54.2gb], net total_space [112.8gb], types [apfs]
+...
+...
+...
+...
+[2018-01-23T11:05:01,267][INFO ][o.e.h.n.Netty4HttpServerTransport] [_ICupdp] publish_address {127.0.0.1:9200}, bound_addresses {[::1]:9200}, {127.0.0.1:9200}
+[2018-01-23T11:05:01,267][INFO ][o.e.n.Node               ] [_ICupdp] started
+</code></pre>
+<p>OK, 启动成功</p>
+<h2>测试</h2>
+<pre><code>在浏览器中直接输入 localhost:9200就可以看到ES的输出信息了。
+</code></pre>
+<p>这样我们就可以在eclipse中debug调试Elasticsearch了。</p>
+</body>
+</html>

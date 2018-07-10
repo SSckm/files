@@ -1,0 +1,594 @@
+<!doctype html>
+<html>
+<head>
+<meta charset='UTF-8'><meta name='viewport' content='width=device-width initial-scale=1'>
+<title>Spring 之 Spring Security 讲解.md</title></head>
+<body><p></p>
+<h1>准备工作</h1>
+<p>安装Java（不做说明）
+安装Maven
+<a href='http://blog.csdn.net/mrsunnycream/article/details/45025135' target='_blank' >http://blog.csdn.net/mrsunnycream/article/details/45025135</a></p>
+<h1>Maven 配置</h1>
+<pre lang='undefined'>
+&lt;dependency&gt;
+	&lt;groupId&gt;org.springframework.security&lt;/groupId&gt;
+	&lt;artifactId&gt;spring-security-web&lt;/artifactId&gt;
+	&lt;version&gt;4.0.4.RELEASE&lt;/version&gt;
+&lt;/dependency&gt;
+
+&lt;dependency&gt;
+	&lt;groupId&gt;org.springframework.security&lt;/groupId&gt;
+	&lt;artifactId&gt;spring-security-config&lt;/artifactId&gt;
+	&lt;version&gt;4.0.4.RELEASE&lt;/version&gt;
+&lt;/dependency&gt;
+
+&lt;dependency&gt;
+	&lt;groupId&gt;org.springframework.security&lt;/groupId&gt;
+	&lt;artifactId&gt;spring-security-taglibs&lt;/artifactId&gt;
+	&lt;version&gt;4.0.4.RELEASE&lt;/version&gt;
+&lt;/dependency&gt;
+</pre>
+<h1>Spring  Security Filter 列表</h1>
+<p><img src='http://img.soaer.com/blog/3.jpg' alt='' /></p>
+<p>经常用到的Filter列表</p>
+<pre lang='undefined'>
+ 1. CONCURRENT_SESSION_FILTER
+ 2. CSRF_FILTER
+ 3. LOGOUT_FILTER
+ 4. CAS_FILTER
+ 5. FORM_LOGIN_FILTER
+ 6. SESSION_MANAGEMENT_FILTER
+ 7. FILTER_SECURITY_INTERCEPTOR
+</pre>
+<h1>Filter 说明</h1>
+<h3>CONCURRENT_SESSION_FILTER</h3>
+<p>这个Filter顾名思义就是控制Session并发的，比如同一个用户在不同的地方登录，那么先登录的再次刷新的时候就会是无效登录。</p>
+<h3>CSRF_FILTER</h3>
+<p>这个Filter 主要是针对CSRF攻击的，Security 4.x版本后会默认开启这个Filter</p>
+<p>如果要禁用这个功能
+使用下面的配置</p>
+<pre lang='undefined'>
+&lt;http use-expressions=&quot;true&quot; entry-point-ref=&quot;authenticationEntryPoint&quot; &gt;
+		&lt;csrf disabled=&quot;true&quot; /&gt;
+&lt;/http&gt;
+</pre>
+<h3>LOGOUT_FILTER</h3>
+<p>主要是做安全退出使用的（包括销毁Spring Security 的Session）</p>
+<h3>CAS_FILTER</h3>
+<p>这个Filter 主要是集成SSO服务用的Filter，如果使用CAS_FILTER，和Spring Security的权限控制，就可以在这个Filter中来生成用户的登录凭证到 Spring Security Session当中去。</p>
+<h3>FORM_LOGIN_FILTER</h3>
+<p>这个Filter主要是操作登录用到的，进行登录验证</p>
+<h3>SESSION_MANAGEMENT_FILTER</h3>
+<p>这个Filter功能很强大，主要是防止Session固定攻击的，但是可以配置，有三个配置，第一个是使用原有的Session，第二个是复制一个Session 但是不复制原来Session的属性，第三个是完全复制Session。
+不知道的同学可以Google一下 Session 固化</p>
+<h3>FILTER_SECURITY_INTERCEPTOR</h3>
+<p>这个Filter主要是做权限提供和验证用户是否有访问某一个资源的权限</p>
+<p>注：本文主要是学习</p>
+<p>FORM_LOGIN_FILTER
+LOGOUT_FILTER
+FILTER_SECURITY_INTERCEPTOR</p>
+<p>CONCURRENT_SESSION_FILTER可以查看官网的配置也很简单。
+CAS_FILTER 我现在用的是OpenSAML实现的认证中心的方式，信息交互不很一样所以没有用到CAS_FILTER</p>
+<p>CSRF_FILTER现在我是禁用的</p>
+<h1>配置web.xml</h1>
+<pre lang='undefined'>
+&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;web-app version=&quot;3.0&quot; xmlns=&quot;http://java.sun.com/xml/ns/javaee&quot;
+	xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+	xsi:schemaLocation=&quot;http://java.sun.com/xml/ns/javaee 
+    http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd&quot;&gt;
+	&lt;context-param&gt;
+		&lt;param-name&gt;webAppRootKey&lt;/param-name&gt;
+		&lt;param-value&gt;org.sms.root&lt;/param-value&gt;
+	&lt;/context-param&gt;
+
+	&lt;context-param&gt;
+		&lt;param-name&gt;contextConfigLocation&lt;/param-name&gt;
+		&lt;param-value&gt;/WEB-INF/config/spring/*.xml&lt;/param-value&gt;
+	&lt;/context-param&gt;
+	&lt;filter&gt;
+		&lt;filter-name&gt;encodingFilter&lt;/filter-name&gt;
+		&lt;filter-class&gt;org.springframework.web.filter.CharacterEncodingFilter&lt;/filter-class&gt;
+		&lt;init-param&gt;
+			&lt;param-name&gt;encoding&lt;/param-name&gt;
+			&lt;param-value&gt;UTF-8&lt;/param-value&gt;
+		&lt;/init-param&gt;
+		&lt;init-param&gt;
+			&lt;param-name&gt;forceEncoding&lt;/param-name&gt;
+			&lt;param-value&gt;true&lt;/param-value&gt;
+		&lt;/init-param&gt;
+	&lt;/filter&gt;
+	&lt;filter-mapping&gt;
+		&lt;filter-name&gt;encodingFilter&lt;/filter-name&gt;
+		&lt;url-pattern&gt;/*&lt;/url-pattern&gt;
+	&lt;/filter-mapping&gt;
+	&lt;filter&gt;
+		&lt;filter-name&gt;SamlFilter&lt;/filter-name&gt;
+		&lt;filter-class&gt;org.sms.project.filter.SamlFilter&lt;/filter-class&gt;
+	&lt;/filter&gt;
+	&lt;filter-mapping&gt;
+		&lt;filter-name&gt;SamlFilter&lt;/filter-name&gt;
+		&lt;url-pattern&gt;/*&lt;/url-pattern&gt;
+	&lt;/filter-mapping&gt;
+	&lt;context-param&gt;
+		&lt;param-name&gt;log4jConfigLocation&lt;/param-name&gt;
+		&lt;param-value&gt;/WEB-INF/config/log4j/log4j.xml&lt;/param-value&gt;
+	&lt;/context-param&gt;
+	&lt;context-param&gt;
+		&lt;param-name&gt;log4jRefreshInterval&lt;/param-name&gt;
+		&lt;param-value&gt;60000&lt;/param-value&gt;
+	&lt;/context-param&gt;
+
+	&lt;filter&gt;
+		&lt;filter-name&gt;springSecurityFilterChain&lt;/filter-name&gt;
+		&lt;filter-class&gt;org.springframework.web.filter.DelegatingFilterProxy&lt;/filter-class&gt;
+	&lt;/filter&gt;
+	&lt;filter-mapping&gt;
+		&lt;filter-name&gt;springSecurityFilterChain&lt;/filter-name&gt;
+		&lt;url-pattern&gt;/*&lt;/url-pattern&gt;
+	&lt;/filter-mapping&gt;
+
+	&lt;listener&gt;
+		&lt;listener-class&gt;org.springframework.web.util.Log4jConfigListener&lt;/listener-class&gt;
+	&lt;/listener&gt;
+	&lt;listener&gt;
+		&lt;listener-class&gt;org.springframework.web.context.ContextLoaderListener&lt;/listener-class&gt;
+	&lt;/listener&gt;
+	&lt;listener&gt;
+		&lt;listener-class&gt;org.sms.project.listener.SysContextLoaderListener&lt;/listener-class&gt;
+	&lt;/listener&gt;
+	&lt;listener&gt;
+		&lt;listener-class&gt;org.sms.project.listener.SysSessionListener&lt;/listener-class&gt;
+	&lt;/listener&gt;
+	&lt;listener&gt;
+		&lt;listener-class&gt;org.springframework.security.web.session.HttpSessionEventPublisher&lt;/listener-class&gt;
+	&lt;/listener&gt;
+	&lt;servlet&gt;
+		&lt;servlet-name&gt;springServlet&lt;/servlet-name&gt;
+		&lt;servlet-class&gt;org.springframework.web.servlet.DispatcherServlet&lt;/servlet-class&gt;
+		&lt;init-param&gt;
+			&lt;param-name&gt;contextConfigLocation&lt;/param-name&gt;
+			&lt;param-value&gt;/WEB-INF/config/dispatcher-servlet.xml&lt;/param-value&gt;
+		&lt;/init-param&gt;
+		&lt;load-on-startup&gt;1&lt;/load-on-startup&gt;
+	&lt;/servlet&gt;
+	&lt;servlet-mapping&gt;
+		&lt;servlet-name&gt;springServlet&lt;/servlet-name&gt;
+		&lt;url-pattern&gt;/&lt;/url-pattern&gt;
+	&lt;/servlet-mapping&gt;
+
+	&lt;session-config&gt;
+		&lt;session-timeout&gt;60&lt;/session-timeout&gt;
+	&lt;/session-config&gt;
+	&lt;welcome-file-list&gt;
+		&lt;welcome-file&gt;index.html&lt;/welcome-file&gt;
+	&lt;/welcome-file-list&gt;
+	&lt;error-page&gt;
+		&lt;error-code&gt;404&lt;/error-code&gt;
+		&lt;location&gt;/jsp/error/404.jsp&lt;/location&gt;
+	&lt;/error-page&gt;
+	&lt;!-- 500错误拦截 --&gt;
+	&lt;error-page&gt;
+		&lt;error-code&gt;500&lt;/error-code&gt;
+		&lt;location&gt;/jsp/error/500.jsp&lt;/location&gt;
+	&lt;/error-page&gt;
+&lt;/web-app&gt;
+</pre>
+<h2>Spring Security功能详解</h2>
+<h3>LoginFilter 定义</h3>
+<p>applicationContext-security.xml 配置说明</p>
+<pre lang='undefined'>
+&lt;beans:bean id=&quot;loginFilter&quot; class=&quot;org.sms.project.login.LoginFilter&quot;&gt;
+		&lt;beans:property name=&quot;filterProcessesUrl&quot; value=&quot;/loginFilter&quot;&gt;&lt;/beans:property&gt;
+		&lt;beans:property name=&quot;authenticationManager&quot; ref=&quot;authenticationManager&quot;&gt;&lt;/beans:property&gt;
+		&lt;beans:property name=&quot;usernameParameter&quot; value=&quot;username&quot; /&gt;
+		&lt;beans:property name=&quot;passwordParameter&quot; value=&quot;password&quot; /&gt;
+		&lt;beans:property name=&quot;authenticationSuccessHandler&quot; ref=&quot;loginSuccessHandler&quot;&gt;&lt;/beans:property&gt;
+		&lt;beans:property name=&quot;authenticationFailureHandler&quot; ref=&quot;loginFailureHandler&quot;&gt;&lt;/beans:property&gt;
+&lt;/beans:bean&gt;
+</pre>
+<p>注：上面的配置是自定义LoginFilter,也可以使用Security自带的Filter</p>
+<p>LoginFilter.java</p>
+<pre lang='undefined'>
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import org.sms.SysConstants;
+import org.sms.organization.user.entity.User;
+import org.sms.organization.user.service.UserService;
+import org.sms.project.encrypt.md5.MD5;
+import org.sms.project.helper.SessionHelper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationServiceException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+/**
+ * 用户登录Filter
+ * @author Sunny
+ */
+public class LoginFilter extends UsernamePasswordAuthenticationFilter {
+
+  @Autowired
+  private UserService userService;
+
+  @Override
+  public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
+    
+    /**
+     * 登录方法判断，仅支持POST提交
+     */
+    if (!SysConstants.POST_METHOE.equals(request.getMethod())) {
+      throw new AuthenticationServiceException(&quot;Authentication method not supported: &quot; + request.getMethod());
+    }
+    
+    String username = obtainUsername(request);
+    String password = obtainPassword(request);
+    if (null == username || null == password || username.equals(&quot;&quot;))
+      throw new AuthenticationServiceException(&quot;用户名或者密码为空！&quot;);
+    username = username.trim();
+    User user = this.userService.findUserByLoginId(username);
+    if (null == user)
+      throw new AuthenticationServiceException(&quot;用户不存在！&quot;);
+    if (!user.isEnabled())
+      throw new AuthenticationServiceException(&quot;用户已经被锁定！&quot;);
+    if (!password.equals(user.getPassword()))
+      throw new AuthenticationServiceException(&quot;用户名或者密码错误！&quot;);
+    UsernamePasswordAuthenticationToken authRequest = new UsernamePasswordAuthenticationToken(username, salt);
+    setDetails(request, authRequest);
+    SessionHelper.put(request, SysConstants.LOGIN_USER, user);
+    return this.getAuthenticationManager().authenticate(authRequest);
+  }
+}
+</pre>
+<p>当然如果使用的SSO登录的统一认证中心的话就省略了这个
+LoginFilter</p>
+<h3>FILTER_SECURITY_INTERCEPTOR</h3>
+<p>applicationContext-security.xml</p>
+<pre lang='undefined'>
+
+&lt;http use-expressions=&quot;true&quot; entry-point-ref=&quot;authenticationEntryPoint&quot; &gt;
+		&lt;csrf disabled=&quot;true&quot; /&gt;
+		&lt;custom-filter ref=&quot;loginFilter&quot; position=&quot;FORM_LOGIN_FILTER&quot; /&gt;
+		&lt;custom-filter ref=&quot;customLogoutFilter&quot; position=&quot;LOGOUT_FILTER&quot; /&gt;
+		&lt;custom-filter ref=&quot;securityFilter&quot; before=&quot;FILTER_SECURITY_INTERCEPTOR&quot; /&gt;
+&lt;/http&gt;
+&lt;beans:bean id=&quot;authenticationEntryPoint&quot; class=&quot;org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint&quot;&gt;
+		&lt;beans:constructor-arg value=&quot;/html/authen.html&quot; /&gt;
+&lt;/beans:bean&gt;
+&lt;beans:bean id=&quot;securityFilter&quot; class=&quot;org.sms.project.filter.SecurityFilter&quot;&gt;
+		&lt;beans:property name=&quot;accessDecisionManager&quot; ref=&quot;accessDecisionManager&quot;&gt;&lt;/beans:property&gt;
+		&lt;beans:property name=&quot;securityMetadataSource&quot; ref=&quot;securityMetadataSource&quot;&gt;&lt;/beans:property&gt;
+		&lt;beans:property name=&quot;authenticationManager&quot; ref=&quot;authenticationManager&quot;&gt;&lt;/beans:property&gt;
+	&lt;/beans:bean&gt;
+
+	&lt;beans:bean id=&quot;securityMetadataSource&quot; class=&quot;org.sms.project.security.SysMetadataSource&quot;&gt;
+		&lt;beans:property name=&quot;resourceService&quot; ref=&quot;resourceService&quot;&gt;&lt;/beans:property&gt;
+	&lt;/beans:bean&gt;
+
+	&lt;beans:bean id=&quot;accessDecisionManager&quot; class=&quot;org.sms.project.security.SysDecisionManager&quot;&gt;
+	&lt;/beans:bean&gt;
+
+	&lt;authentication-manager&gt;
+		&lt;authentication-provider user-service-ref=&quot;sysUserDetailsService&quot;&gt;&lt;/authentication-provider&gt;
+	&lt;/authentication-manager&gt;
+	&lt;beans:bean id=&quot;sysUserDetailsService&quot; class=&quot;org.sms.project.security.SysUserDetailsService&quot;&gt;
+		&lt;authentication-manager alias=&quot;authenticationManager&quot;&gt;
+		&lt;authentication-provider user-service-ref=&quot;sysUserDetailsService&quot;&gt;&lt;/authentication-provider&gt;
+	&lt;/authentication-manager&gt;
+&lt;/beans:bean&gt;
+
+</pre>
+<p>SecurityFilter.java</p>
+<pre lang='undefined'>
+import java.io.IOException;
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import org.springframework.security.access.SecurityMetadataSource;
+import org.springframework.security.access.intercept.AbstractSecurityInterceptor;
+import org.springframework.security.access.intercept.InterceptorStatusToken;
+import org.springframework.security.web.FilterInvocation;
+import org.springframework.security.web.access.intercept.FilterInvocationSecurityMetadataSource;
+
+/**
+ * @author Sunny
+ */
+public class SecurityFilter extends AbstractSecurityInterceptor implements Filter {
+  
+  private FilterInvocationSecurityMetadataSource securityMetadataSource;
+
+  @Override
+  public SecurityMetadataSource obtainSecurityMetadataSource() {
+    return this.securityMetadataSource;
+  }
+
+  public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+    FilterInvocation fi = new FilterInvocation(request, response, chain);
+    invoke(fi);
+  }
+
+  private void invoke(FilterInvocation fi) throws IOException, ServletException {
+    InterceptorStatusToken token = super.beforeInvocation(fi);
+    try {
+      fi.getChain().doFilter(fi.getRequest(), fi.getResponse());
+    } finally {
+      super.afterInvocation(token, null);
+    }
+  }
+
+  public FilterInvocationSecurityMetadataSource getSecurityMetadataSource() {
+    return securityMetadataSource;
+  }
+
+  public void setSecurityMetadataSource(FilterInvocationSecurityMetadataSource securityMetadataSource) {
+    this.securityMetadataSource = securityMetadataSource;
+  }
+
+  public void init(FilterConfig arg0) throws ServletException {
+  }
+
+  public void destroy() {
+  }
+
+  @Override
+  public Class&lt;? extends Object&gt; getSecureObjectClass() {
+    return FilterInvocation.class;
+  }
+}
+</pre>
+<p>SysDecisionManager.java</p>
+<pre lang='undefined'>
+import java.util.Collection;
+import org.springframework.security.access.AccessDecisionManager;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.access.ConfigAttribute;
+import org.springframework.security.authentication.InsufficientAuthenticationException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+
+/**
+ * @author Sunny
+ */
+public class SysDecisionManager implements AccessDecisionManager {
+
+  @Override
+  public void decide(Authentication authentication, Object object, Collection&lt;ConfigAttribute&gt; configAttributes) throws AccessDeniedException, InsufficientAuthenticationException {
+    for (ConfigAttribute allConfigAttribute : configAttributes) {
+      final String needPermission = allConfigAttribute.getAttribute();
+      for (GrantedAuthority ga : authentication.getAuthorities()) {
+        if (needPermission.equals(ga.getAuthority())) {
+          return;
+        }
+      }
+    }
+    throw new AccessDeniedException(&quot;您访问的资源没有权限！！&quot;);
+  }
+
+  @Override
+  public boolean supports(ConfigAttribute configAttribute) {
+    return true;
+  }
+
+  @Override
+  public boolean supports(Class&lt;?&gt; clazz) {
+    return true;
+  }
+}
+</pre>
+<p>SysMetadataSource.java</p>
+<pre lang='undefined'>
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import javax.servlet.http.HttpServletRequest;
+import org.sms.project.resource.dao.ResourceDao.ResourceMapping;
+import org.sms.project.resource.service.ResourceService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.ConfigAttribute;
+import org.springframework.security.access.SecurityConfig;
+import org.springframework.security.web.FilterInvocation;
+import org.springframework.stereotype.Service;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.util.matcher.RequestMatcher;
+import org.springframework.security.web.access.intercept.FilterInvocationSecurityMetadataSource;
+
+/**
+ * 资源角色管理器
+ * @author Sunny
+ */
+@Service(&quot;sysMetadataSource&quot;)
+public class SysMetadataSource implements FilterInvocationSecurityMetadataSource {
+
+  @Autowired
+  private ResourceService resourceService;
+
+  private Map&lt;String, List&lt;ConfigAttribute&gt;&gt; configAttributes;
+
+  private RequestMatcher requestMatcher = null;
+
+  public SysMetadataSource() {
+    super();
+  }
+
+  public final ResourceService getResourceService() {
+    return resourceService;
+  }
+
+  public final void setResourceService(ResourceService resourceService) {
+    this.resourceService = resourceService;
+  }
+
+  @Override
+  public Collection&lt;ConfigAttribute&gt; getAttributes(Object object) throws IllegalArgumentException {
+
+    final HttpServletRequest request = ((FilterInvocation) object).getRequest();
+    if (null == configAttributes)
+      this.load();
+    final List&lt;ConfigAttribute&gt; list = new ArrayList&lt;ConfigAttribute&gt;();
+    configAttributes.forEach((K, V) -&gt; {
+      requestMatcher = new AntPathRequestMatcher(K);
+      if (null != K) {
+        if (requestMatcher.matches(request)) {
+          if (null != V) {
+            list.addAll(V);
+          }
+        }
+      }
+    });
+    return list;
+  }
+
+  /**
+   * 加载所有的url访问时需要的角色
+   */
+  private void load() {
+    List&lt;ResourceMapping&gt; resourceMappings = resourceService.getResourceMappings();
+    if (resourceMappings.size() == 0)
+      return;
+    this.configAttributes = new HashMap&lt;String, List&lt;ConfigAttribute&gt;&gt;();
+    resourceMappings.forEach(resourceMapping -&gt; {
+      final List&lt;ConfigAttribute&gt; list = new ArrayList&lt;ConfigAttribute&gt;(1);
+      final String url = resourceMapping.getUrl();
+      final String role_name = resourceMapping.getRole_name();
+      if (null != url) {
+        ConfigAttribute configAttribute = new SecurityConfig(role_name);
+        list.add(configAttribute);
+        final List&lt;ConfigAttribute&gt; isExit = configAttributes.get(url);
+        if (isExit == null) {
+          configAttributes.put(url, list);
+        } else {
+          if (isExit.contains(configAttribute)) {
+            configAttributes.put(url, list);
+          } else {
+            isExit.addAll(list);
+            configAttributes.put(url, isExit);
+          }
+        }
+      }
+    });
+  }
+  
+  public void addResourceToConfigAttributes(String url, String ...role_names) {
+    if (null == url || null == role_names || role_names.length == 0)
+      return;
+    ConfigAttribute configAttribute = null;
+    List&lt;ConfigAttribute&gt; list = new ArrayList&lt;ConfigAttribute&gt;(role_names.length);
+    if (configAttributes.get(url) == null) {
+      for (String role_name : role_names) {
+        configAttribute = new SecurityConfig(role_name);
+        list.add(configAttribute);
+      }
+      configAttributes.put(url, list);
+    } else {
+      final List&lt;ConfigAttribute&gt; isExit = configAttributes.get(url);
+      for (String role_name : role_names) {
+        configAttribute = new SecurityConfig(role_name);
+        if (!isExit.contains(configAttribute)) {
+          isExit.add(configAttribute);
+        }
+      }
+      configAttributes.put(url, isExit);
+    }
+  }
+
+  @Override
+  public boolean supports(Class&lt;?&gt; clazz) {
+    return true;
+  }
+
+  @Override
+  public Collection&lt;ConfigAttribute&gt; getAllConfigAttributes() {
+    return null;
+  }
+}
+</pre>
+<p>SysUserDetailsService.java</p>
+<pre lang='undefined'>
+import java.util.HashSet;
+import java.util.Set;
+import org.sms.organization.user.entity.User;
+import org.sms.organization.user.service.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+
+/**
+ * @author Sunny
+ */
+public class SysUserDetailsService implements UserDetailsService {
+
+  @Autowired
+  private UserService sysUserService;
+
+  @Override
+  public UserDetails loadUserByUsername(String login_id) throws UsernameNotFoundException {
+    User user = sysUserService.findUserByLogin_Id(login_id);
+    this.buildAuths(user);
+    return user;
+  }
+
+  private void buildAuths(User user) {
+    Set&lt;GrantedAuthority&gt; auths = new HashSet&lt;GrantedAuthority&gt;();
+    auths.add(new SimpleGrantedAuthority(&quot;ADMIN&quot;));
+    user.setAuthorities(auths);
+  }
+}
+</pre>
+<h2>当使用Spring  Security 自定义增加凭证到Session</h2>
+<p>在不使用CASFilter的情况下</p>
+<p>SampleAuthenticationManager.java</p>
+<pre lang='undefined'>
+import java.util.ArrayList;
+import java.util.List;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+
+/**
+ * @author Sunny
+ */
+public class SampleAuthenticationManager implements AuthenticationManager {
+
+  private List&lt;String&gt; list;
+
+  public SampleAuthenticationManager(List&lt;String&gt; list) {
+    this.list = list;
+  }
+
+  @Override
+  public Authentication authenticate(Authentication authentication) throws AuthenticationException {
+    final List&lt;GrantedAuthority&gt; authoritys = new ArrayList&lt;GrantedAuthority&gt;();
+    list.forEach(pereRoleName -&gt; {
+      authoritys.add(new SimpleGrantedAuthority(pereRoleName));
+    });
+    return new UsernamePasswordAuthenticationToken(authentication.getName(), authentication.getCredentials(), authoritys);
+  }
+}
+</pre>
+<p>调用SampleAuthenticationManager.java</p>
+<pre lang='undefined'>
+	final List&lt;String&gt; list = new ArrayList&lt;String&gt;();
+    list.add(&quot;ADMIN&quot;);
+    AuthenticationManager authenticationManager = new SampleAuthenticationManager(list);
+    //其中password可以是票据之类的对象
+    Authentication request = new UsernamePasswordAuthenticationToken(name, password);
+    Authentication result = authenticationManager.authenticate(request);
+    SecurityContextHolder.getContext().setAuthentication(result);
+</pre>
+<p></p>
+<p></p>
+</body>
+</html>
