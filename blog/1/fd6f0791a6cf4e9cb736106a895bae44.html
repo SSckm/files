@@ -1,0 +1,392 @@
+<!doctype html>
+<html lang="en">
+ <!--<![endif]-->
+ <!-- BEGIN HEAD -->
+ <head> 
+  <meta charset="utf-8"> 
+  <!-- 博客标题 --> 
+  <title>Elasticsearch源码阅读(三) 节点的选举 - Sunny个人博客</title> 
+  <meta http-equiv="X-UA-Compatible" content="IE=edge"> 
+  <meta name="keywords" content="本文主要讲解Elasticsearch在启动过程中进行节点选举部分。"> 
+  <meta name="description" content="本文主要讲解Elasticsearch在启动过程中进行节点选举部分。"> 
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+  <meta content="width=device-width, initial-scale=1" name="viewport"> 
+  <meta content="" name="author"> 
+  <!-- javascript初始化区域 --> 
+  <link href="https://blog.soaer.com/global/plugins/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css"> 
+  <link href="https://blog.soaer.com/global/plugins/simple-line-icons/simple-line-icons.min.css" rel="stylesheet" type="text/css"> 
+  <link href="https://css.soaer.com/global/plugins/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css"> 
+  <link href="https://css.soaer.com/global/css/index.components.min.css" rel="stylesheet" id="style_components" type="text/css"> 
+  <link href="https://css.soaer.com/layouts/layout4/css/layout.min.css" rel="stylesheet" type="text/css"> 
+  <link href="https://css.soaer.com/layouts/layout4/css/themes/default.min.css" rel="stylesheet" type="text/css" id="style_color"> 
+  <link href="https://css.soaer.com/layouts/layout4/css/md.css" rel="stylesheet" type="text/css"> 
+  <link href="https://css.soaer.com/apps/css/todo-2.min.css" rel="stylesheet" type="text/css"> 
+  <link href="https://css.soaer.com/pages/css/profile.min.css" rel="stylesheet" type="text/css"> 
+  <script type="text/javascript">
+var blogKey="fd6f0791a6cf4e9cb736106a895bae44" 
+var userName="Sunny" 
+var blogId="61" 
+
+</script>
+ </head> 
+ <body class="page-container-bg-solid page-header-fixed page-sidebar-closed-hide-logo"> 
+  <!-- BEGIN HEADER --> 
+  <div class="page-header navbar navbar-fixed-top"> 
+   <!-- BEGIN HEADER INNER --> 
+   <div class="page-header-inner "> 
+    <div class="page-top"> 
+     <div class="top-menu"> 
+      <ul class="nav navbar-nav pull-right"> 
+       <li class="separator hide"></li> 
+       <li class="dropdown dropdown-extended dropdown-notification dropdown-dark" id="header_notification_bar"><a href="https://www.soaer.com" class="dropdown-toggle" data-close-others="true"> <i class="fa fa-home"></i> <span class="badge badge-success">首页</span></a> </li> 
+       <li class="separator hide"></li> 
+       <li class="dropdown dropdown-extended dropdown-inbox dropdown-dark" id="header_inbox_bar"><a href="https://tool.soaer.com" class="dropdown-toggle" data-close-others="true"> <i class="fa fa-cog"></i> <span class="badge badge-danger">工具</span> </a></li> 
+       <li class="separator hide"></li> 
+       <li class="dropdown dropdown-extended dropdown-tasks dropdown-dark" id="header_task_bar"><a href="https://blog.soaer.com" class="dropdown-toggle" data-close-others="true"> <i class="fa fa-file"></i> <span class="badge badge-primary">博客</span></a> </li> 
+      </ul> 
+     </div> 
+     <!-- END TOP NAVIGATION MENU --> 
+    </div> 
+    <!-- END PAGE TOP --> 
+   </div> 
+   <!-- END HEADER INNER --> 
+  </div> 
+  <!-- END HEADER --> 
+  <!-- BEGIN HEADER & CONTENT DIVIDER --> 
+  <div class="clearfix"></div> 
+  <!-- END HEADER & CONTENT DIVIDER --> 
+  <!-- BEGIN CONTAINER --> 
+  <div class="page-container"> 
+   <!-- BEGIN SIDEBAR --> 
+   <div class="page-sidebar-wrapper"> 
+    <!-- BEGIN SIDEBAR --> 
+    <!-- DOC: Set data-auto-scroll="false" to disable the sidebar from auto scrolling/focusing --> 
+    <!-- DOC: Change data-auto-speed="200" to adjust the sub menu slide up/down speed --> 
+    <div class="page-sidebar navbar-collapse collapse"> 
+     <ul class="page-sidebar-menu   " data-keep-expanded="false" data-auto-scroll="true" data-slide-speed="200"> 
+      <div class="profile-sidebar"> 
+       <!-- PORTLET MAIN --> 
+       <div class="portlet light profile-sidebar-portlet bordered"> 
+        <!-- SIDEBAR USERPIC --> 
+        <div class="profile-userpic"> 
+         <img src="https://img.soaer.com/pages/media/profile/sunny.jpg" class="img-responsive" alt=""> 
+        </div> 
+        <!-- 博客作者名称 --> 
+        <div class="profile-usertitle"> 
+         <div class="profile-usertitle-name">
+          Sunny
+         </div> 
+        </div> 
+       </div> 
+       <div id="ad"> 
+        <!-- <img  width="100%" src="http://f12.baidu.com/it/u=292560263,2120845313&fm=76"> --> 
+       </div> 
+       <br> 
+       <div class="portlet light bordered"> 
+        <div> 
+         <!-- 阅读次数 --> 
+         <div class="margin-top-10 profile-desc-link" id="blogReadNum"></div> 
+         <!-- 创建时间 --> 
+         <div class="margin-top-10 profile-desc-link" id="blogCreateDate">
+          创建日期：2018年8月7日
+         </div> 
+        </div> 
+        <br> 
+        <div id="lastBlogList"> 
+         <h4 class="profile-desc-title">最近发表的文章</h4> 
+         <!-- <span class="profile-desc-text"> Lorem ipsum dolor sit amet diam nonummy nibh dolore. </span> --> 
+         <!-- 最新发表的博客列表 --> 
+        </div> 
+       </div> 
+       <!-- END PORTLET MAIN --> 
+      </div> 
+     </ul> 
+     <!-- END SIDEBAR MENU --> 
+    </div> 
+    <!-- END SIDEBAR --> 
+   </div> 
+   <!-- END SIDEBAR --> 
+   <!-- BEGIN CONTENT --> 
+   <!-- END QUICK SIDEBAR --> 
+   <div class="page-content-wrapper"> 
+    <div class="page-content"> 
+     <div class="page-head"> 
+      <!-- BEGIN PAGE TITLE --> 
+      <!-- 博客标题 --> 
+      <div id="page-title"> 
+       <h1>Elasticsearch源码阅读(三) 节点的选举</h1> 
+      </div> 
+      <!-- END PAGE TITLE --> 
+      <!-- BEGIN PAGE TOOLBAR --> 
+      <!-- END PAGE TOOLBAR --> 
+     </div> 
+     <br> 
+     <!-- 博客标签列表 --> 
+     <div class="noteAd">
+      <a href="javascript:;" class="btn btn-circle red disabled">原创</a>
+      <a href="javascript:;" class="btn btn-circle green disabled">标签</a>
+      <a href="javascript:;" class="btn btn-circle green">elasticsearch</a>
+      <a href="javascript:;" class="btn btn-circle green">es</a>
+      <a href="javascript:;" class="btn btn-circle green">节点选举</a>
+      <a href="javascript:;" class="btn btn-circle green">选主</a>
+     </div> 
+     <h2>简介</h2> 
+     <pre><code>继上篇文章调试源码环境以后，本文主要讲解Elasticsearch在启动过程中进行节点选举部分。
+</code></pre> 
+     <h2>环境介绍</h2> 
+     <pre><code> 系统：Mac os
+ Elasticsearch6.1.2
+</code></pre> 
+     <h2>Discovery实现类</h2> 
+     <pre><code>...
+org.elasticsearch.node.Node#start
+
+此处的Discovery实例主要是根据配置文件生成相应的Discovery。
+org.elasticsearch.discovery.DiscoveryModule中会根据配置文件的配置生成具体的Discovery的实现类。
+在此处我的配置为：discovery.type： zen.
+
+Discovery discovery = injector.getInstance(Discovery.class);//此处根据配置生成的实现类为：org.elasticsearch.discovery.zen.ZenDiscovery
+</code></pre> 
+     <h2>Discovery#startInitialJoin-&gt;innerJoinCluster 方法</h2> 
+     <pre><code> while (masterNode == null &amp;&amp; joinThreadControl.joinThreadActive(currentThread)) {
+      masterNode = findMaster();//寻找master节点。入口方法，直到找到masterNode。
+ }
+</code></pre> 
+     <h2>ZenDiscovery#findMaster()方法</h2> 
+     <pre><code>//ping所有的节点地址，在上文中已经说到支持的形式比如域名等的支持。得到返回结果
+List&lt;ZenPing.PingResponse&gt; fullPingResponses = pingAndWait(pingTimeout).toList();
+if (fullPingResponses == null) {
+   logger.trace("No full ping responses");
+   return null;
+}
+
+
+//当前可能的master节点（注意这里的activeMasters并不是在配置文件中配置的master:true, 而是其他节点选举出来的master节点，其中可能会有不同的节点选举不同的master节点，所以这里是列表）。
+List&lt;DiscoveryNode&gt; activeMasters = new ArrayList&lt;&gt;();
+for (ZenPing.PingResponse pingResponse : pingResponses) {         
+   if (pingResponse.master() != null &amp;&amp; !localNode.equals(pingResponse.master())) {
+          activeMasters.add(pingResponse.master());
+   }
+}
+
+//这里的masterCandidates指的是在配置文件中有资格成为master节点的候选节点，下面会用到。
+List&lt;ElectMasterService.MasterCandidate&gt; masterCandidates = new ArrayList&lt;&gt;();
+for (ZenPing.PingResponse pingResponse : pingResponses) {
+    if (pingResponse.node().isMasterNode()) {
+    masterCandidates.add(new ElectMasterService.MasterCandidate(pingResponse.node(), pingResponse.getClusterStateVersion()));
+    }
+}
+
+//这里有两种情况，response中没有发现活跃的master节点和有活跃的被选举出来的master节点。
+if (activeMasters.isEmpty()) {
+   
+   //如果活跃的或者说已经被选举出来的master列表为空，此处判断是否有足够的候选者节点。配置项：discovery.zen.minimum_master_nodes
+   if (electMaster.hasEnoughCandidates(masterCandidates)) {
+   	  //如果有多个则进入electMaster方法。下面有关于electMaster方法。
+      final ElectMasterService.MasterCandidate winner = electMaster.electMaster(masterCandidates);
+       logger.trace("candidate {} won election", winner);
+       return winner.getNode();
+   } else {
+       ....
+       如果没有则直接返回null， 之后还会回到上层的while 循环里面继续找master节点。
+       return null;
+            }
+   } else {
+       .....
+       //如果存在活跃的被选举出来的master节点则进入tieBreakActiveMasters方法。请查看下面的tieBreakActiveMasters简介。
+       return electMaster.tieBreakActiveMasters(activeMasters);
+}
+</code></pre> 
+     <h3>electMaster方法</h3> 
+     <pre><code>public MasterCandidate electMaster(Collection&lt;MasterCandidate&gt; candidates) {
+    assert hasEnoughCandidates(candidates);
+    List&lt;MasterCandidate&gt; sortedCandidates = new ArrayList&lt;&gt;(candidates);
+    sortedCandidates.sort(MasterCandidate::compare);
+    return sortedCandidates.get(0);
+}
+
+要注意的是此刻的compare方法其实并不是对比的各个节点的ID大小，而是对比的是clusterStateVersion。
+在初始化version的时候是通过UnicastPingRequest.response初始化进去的。大家可以看下org.elasticsearch.discovery.zen.UnicastZenPing#sendPings方法。
+
+备注：在下面的ClusterState中会进行详细的说明。
+
+
+//根据每个节点的clusterStateVersion状态来决策master节点的选举。后面说明。
+public static int compare(MasterCandidate c1, MasterCandidate c2) {
+    // we explicitly swap c1 and c2 here. the code expects "better" is lower in a sorted
+    // list, so if c2 has a higher cluster state version, it needs to come first.
+    int ret = Long.compare(c2.clusterStateVersion, c1.clusterStateVersion);
+    if (ret == 0) {
+        ret = compareNodes(c1.getNode(), c2.getNode());
+    }
+    return ret;
+}
+</code></pre> 
+     <h4>ZenDiscovery#doStart()-&gt;ClusterState</h4> 
+     <pre><code>此方法主要作用是初始化ClusterState，用于在没有被选举的master节点的情况下根据clasterStateVersion来选举主节点。
+
+ClusterState initialState = builder.blocks(ClusterBlocks.builder().addGlobalBlock(STATE_NOT_RECOVERED_BLOCK).addGlobalBlock(discoverySettings.getNoMasterBlock())).nodes(DiscoveryNodes.builder().add(localNode).localNodeId(localNode.getId())).build();
+
+其中的STATE_NOT_RECOVERED_BLOCK， discoverySettings.getNoMasterBlock()的意思分别为：
+
+大家注意看最后一个参数ClusterBlockLevel.ALL
+这药说明一下：
+
+当集群不能产生一个master的时候，discovery.zen.no_master_block 用来配置操作的策略，它有两个配置
+all (节点上的所有读写操作都被拒绝，这也包括了集群api状态的读写操作)
+write(写操作会被拒绝，读操作能成功)
+discovery.zen.no_master_block 配置的设置不影响节点基本的api,如节点信息和节点统计api
+
+
+STATE_NOT_RECOVERED_BLOCK = ClusterBlock(1, "state not recovered / initialized", true, true, false, RestStatus.SERVICE_UNAVAILABLE, ClusterBlockLevel.ALL);
+
+ClusterBlock NO_MASTER_BLOCK_ALL = new ClusterBlock(NO_MASTER_BLOCK_ID, "no master", true, true, false, RestStatus.SERVICE_UNAVAILABLE, ClusterBlockLevel.ALL);
+
+ClusterBlock NO_MASTER_BLOCK_WRITES = new ClusterBlock(NO_MASTER_BLOCK_ID, "no master", true, false, false, RestStatus.SERVICE_UNAVAILABLE, EnumSet.of(ClusterBlockLevel.WRITE, ClusterBlockLevel.METADATA_WRITE));
+
+这个时候可以看出来原来version的stage的状态有1和2.
+
+committedState.set(initialState);
+</code></pre> 
+     <h2>ElectMasterService#tieBreakActiveMasters</h2> 
+     <pre><code>//此时才会根据每个节点的ID比较大小， 然后取ID最小的。
+public DiscoveryNode tieBreakActiveMasters(Collection&lt;DiscoveryNode&gt; activeMasters) {
+    return activeMasters.stream().min(ElectMasterService::compareNodes).get();
+}
+
+private static int compareNodes(DiscoveryNode o1, DiscoveryNode o2) {
+    if (o1.isMasterNode() &amp;&amp; !o2.isMasterNode()) {
+        return -1;
+    }
+    if (!o1.isMasterNode() &amp;&amp; o2.isMasterNode()) {
+        return 1;
+    }
+    return o1.getId().compareTo(o2.getId());
+}
+</code></pre> 
+     <h3></h3> 
+     <p>&nbsp;</p> 
+     <p>&nbsp;</p>  
+     <!-- --------------------MarkDown文件去也--------------------------- --> 
+     <!-- --------------------------------------------------------- --> 
+     <br> 
+     <div class="note note-info"> 
+      <div align="left"> 
+       <a href="javascript:;" class="btn btn-circle green disabled">上一篇</a>&nbsp;&nbsp; 
+       <a href="https://blog.soaer.com/1/2c1d544004c048f08c86694173894a64.html" id="recommended1">设计模式学习</a> 
+      </div> 
+      <br> 
+      <div align="left"> 
+       <a href="javascript:;" class="btn btn-circle green disabled">下一篇</a>&nbsp;&nbsp; 
+       <a href="" id="recommended2">没有了</a> 
+      </div> 
+     </div> 
+     <!-- 评论区 --> 
+     <div class="row"> 
+      <div class="col-md-12"> 
+       <!-- BEGIN TODO SIDEBAR --> 
+       <div class="todo-ui"> 
+        <!-- END TODO SIDEBAR --> 
+        <!-- BEGIN TODO CONTENT --> 
+        <div class="todo-content"> 
+         <div class="portlet light bordered"> 
+          <!-- PROJECT HEAD --> 
+          <!-- end PROJECT HEAD --> 
+          <div class="portlet-body"> 
+           <div class="row"> 
+            <div class="todo-tasklist-devider"></div> 
+            <div class="col-md-12 col-sm-8"> 
+             <form class="form-horizontal" id="addComments"> 
+              <!-- TASK HEAD --> 
+              <div class="form"> 
+               <div class="form-group"> 
+                <div class="col-md-8 col-sm-8"> 
+                 <div class="todo-taskbody-user"> 
+                  <span class="todo-username pull-left" id="commentsName"></span> 
+                 </div> 
+                </div> 
+               </div> 
+               <!-- TASK DESC --> 
+               <div class="form-group"> 
+                <div class="col-md-12"> 
+                 <textarea class="form-control todo-taskbody-taskdesc" rows="8" placeholder="文明上网" name="content" id="commentsContent"></textarea> 
+                </div> 
+               </div> 
+               <div id="sendCommentsErrorMessage"></div> 
+               <div class="form-actions right todo-form-actions"> 
+                <input type="button" class="btn btn-circle btn-sm green" id="ac" value="提交"> 
+               </div> 
+              </div> 
+             </form> 
+             <form class="form-horizontal" id="sendEmail" style="display: none;"> 
+              <!-- TASK HEAD  style="display:none;" --> 
+              <div class="form"> 
+               <div class="form-group"> 
+                <div class="col-md-12"> 
+                 <textarea class="form-control todo-taskbody-taskdesc" rows="1" name="email" id="sendMailContent" placeholder="邮箱验证，请输入邮箱号"></textarea> 
+                </div> 
+               </div> 
+               <div class="form-actions right todo-form-actions"> 
+                <input type="button" class="btn btn-circle btn-sm green" id="sdm" value="发送"> 
+               </div> 
+              </div> 
+              <div id="sendEmailErrorMessage"></div> 
+             </form> 
+             <form class="form-horizontal" id="validationEmail" style="display: none;"> 
+              <!-- TASK HEAD  style="display:none;" --> 
+              <div class="form"> 
+               <div class="form-group"> 
+                <div class="col-md-12"> 
+                 <textarea class="form-control todo-taskbody-taskdesc" rows="3" name="cid" placeholder="请输入邮箱里面的内容，验证一次再次评论无需验证"></textarea> 
+                </div> 
+               </div> 
+               <div class="form-actions right todo-form-actions"> 
+                <input type="button" class="btn btn-circle btn-sm green" id="vm" value="验证"> 
+               </div> 
+               <div id="validationEmailErrorMessage"></div> 
+              </div> 
+             </form> 
+             <div class="tabbable-line"> 
+              <div class="tab-content"> 
+               <div class="tab-pane active" id="tab_1"> 
+                <!-- TASK COMMENTS --> 
+                <div class="form-group"> 
+                 <div class="col-md-12"> 
+                  <ul class="media-list" id="commentsList"> 
+                   <!-- 单个评论区 --> 
+                   <!-- 单个评论区结束 --> 
+                  </ul> 
+                 </div> 
+                </div> 
+               </div> 
+              </div> 
+             </div> 
+            </div> 
+           </div> 
+          </div> 
+         </div> 
+        </div> 
+        <!-- END TODO CONTENT --> 
+       </div> 
+      </div> 
+      <!-- END PAGE CONTENT--> 
+     </div> 
+    </div> 
+   </div> 
+  </div> 
+  <script src="https://js.soaer.com/global/plugins/jquery.min.js" type="text/javascript"></script> 
+  <script src="https://js.soaer.com/global/plugins/jquery-cookiebar/jquery.cookieBar.min.js" type="text/javascript"></script> 
+  <script src="https://js.soaer.com/global/plugins/bootstrap/js/bootstrap.min.js" type="text/javascript"></script> 
+  <script src="https://js.soaer.com/global/plugins/js.cookie.min.js" type="text/javascript"></script> 
+  <script src="https://js.soaer.com/global/plugins/jquery-slimscroll/jquery.slimscroll.min.js" type="text/javascript"></script> 
+  <script src="https://js.soaer.com/global/plugins/jquery.blockui.min.js" type="text/javascript"></script> 
+  <script src="https://js.soaer.com/global/plugins/bootstrap-switch/js/bootstrap-switch.min.js" type="text/javascript"></script> 
+  <script src="https://js.soaer.com/global/scripts/app.min.js" type="text/javascript"></script> 
+  <script src="https://js.soaer.com/layouts/layout4/scripts/layout.min.js" type="text/javascript"></script> 
+  <script src="https://js.soaer.com/global/plugins/jquery.base64.js" type="text/javascript"></script> 
+  <script src="https://js.soaer.com/layouts/global/scripts/quick-sidebar.min.js" type="text/javascript"></script> 
+  <script src="https://js.soaer.com/global/plugins/js.cookie.min.js" type="text/javascript"></script> 
+  <script src="https://js.soaer.com/layouts/global/scripts/quick-nav.min.js" type="text/javascript"></script> 
+  <script src="https://js.soaer.com/operate/blog.min.js" type="text/javascript"></script>   
+ </body>
+</html>
