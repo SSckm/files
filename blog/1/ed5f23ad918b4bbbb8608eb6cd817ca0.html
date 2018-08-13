@@ -1,0 +1,323 @@
+<!doctype html>
+<html lang="en">
+ <!--<![endif]-->
+ <!-- BEGIN HEAD -->
+ <head> 
+  <meta charset="utf-8"> 
+  <!-- 博客标题 --> 
+  <title>OpenResty&nbsp; 入门开发篇（四）-火焰图优化性能 - Sunny个人博客</title> 
+  <meta http-equiv="X-UA-Compatible" content="IE=edge"> 
+  <meta name="keywords" content="此篇文章主要针对OpenResty中根据火焰图做性能调优。火焰图主要用于显示CPU的调用栈，x 轴表示抽样数，如果一个函数在 x 轴占据的宽度越宽，就表示它被抽到的次数多，即执行的时间长，y 轴表示调"> 
+  <meta name="description" content="此篇文章主要针对OpenResty中根据火焰图做性能调优。火焰图主要用于显示CPU的调用栈，x 轴表示抽样数，如果一个函数在 x 轴占据的宽度越宽，就表示它被抽到的次数多，即执行的时间长，y 轴表示调"> 
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+  <meta content="width=device-width, initial-scale=1" name="viewport"> 
+  <meta content="" name="author"> 
+  <!-- javascript初始化区域 --> 
+  <link href="https://blog.soaer.com/global/plugins/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css"> 
+  <link href="https://blog.soaer.com/global/plugins/simple-line-icons/simple-line-icons.min.css" rel="stylesheet" type="text/css"> 
+  <link href="https://css.soaer.com/global/plugins/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css"> 
+  <link href="https://css.soaer.com/global/css/index.components.min.css" rel="stylesheet" id="style_components" type="text/css"> 
+  <link href="https://css.soaer.com/layouts/layout4/css/layout.min.css" rel="stylesheet" type="text/css"> 
+  <link href="https://css.soaer.com/layouts/layout4/css/themes/default.min.css" rel="stylesheet" type="text/css" id="style_color"> 
+  <link href="https://css.soaer.com/layouts/layout4/css/md.css" rel="stylesheet" type="text/css"> 
+  <link href="https://css.soaer.com/apps/css/todo-2.min.css" rel="stylesheet" type="text/css"> 
+  <link href="https://css.soaer.com/pages/css/profile.min.css" rel="stylesheet" type="text/css"> 
+  <script type="text/javascript">
+var blogKey="ed5f23ad918b4bbbb8608eb6cd817ca0" 
+var userName="Sunny" 
+var blogId="62" 
+
+</script>
+ </head> 
+ <body class="page-container-bg-solid page-header-fixed page-sidebar-closed-hide-logo"> 
+  <!-- BEGIN HEADER --> 
+  <div class="page-header navbar navbar-fixed-top"> 
+   <!-- BEGIN HEADER INNER --> 
+   <div class="page-header-inner "> 
+    <div class="page-top"> 
+     <div class="top-menu"> 
+      <ul class="nav navbar-nav pull-right"> 
+       <li class="separator hide"></li> 
+       <li class="dropdown dropdown-extended dropdown-notification dropdown-dark" id="header_notification_bar"><a href="https://www.soaer.com" class="dropdown-toggle" data-close-others="true"> <i class="fa fa-home"></i> <span class="badge badge-success">首页</span></a> </li> 
+       <li class="separator hide"></li> 
+       <li class="dropdown dropdown-extended dropdown-inbox dropdown-dark" id="header_inbox_bar"><a href="https://tool.soaer.com" class="dropdown-toggle" data-close-others="true"> <i class="fa fa-cog"></i> <span class="badge badge-danger">工具</span> </a></li> 
+       <li class="separator hide"></li> 
+       <li class="dropdown dropdown-extended dropdown-tasks dropdown-dark" id="header_task_bar"><a href="https://blog.soaer.com" class="dropdown-toggle" data-close-others="true"> <i class="fa fa-file"></i> <span class="badge badge-primary">博客</span></a> </li> 
+      </ul> 
+     </div> 
+     <!-- END TOP NAVIGATION MENU --> 
+    </div> 
+    <!-- END PAGE TOP --> 
+   </div> 
+   <!-- END HEADER INNER --> 
+  </div> 
+  <!-- END HEADER --> 
+  <!-- BEGIN HEADER & CONTENT DIVIDER --> 
+  <div class="clearfix"></div> 
+  <!-- END HEADER & CONTENT DIVIDER --> 
+  <!-- BEGIN CONTAINER --> 
+  <div class="page-container"> 
+   <!-- BEGIN SIDEBAR --> 
+   <div class="page-sidebar-wrapper"> 
+    <!-- BEGIN SIDEBAR --> 
+    <!-- DOC: Set data-auto-scroll="false" to disable the sidebar from auto scrolling/focusing --> 
+    <!-- DOC: Change data-auto-speed="200" to adjust the sub menu slide up/down speed --> 
+    <div class="page-sidebar navbar-collapse collapse"> 
+     <ul class="page-sidebar-menu   " data-keep-expanded="false" data-auto-scroll="true" data-slide-speed="200"> 
+      <div class="profile-sidebar"> 
+       <!-- PORTLET MAIN --> 
+       <div class="portlet light profile-sidebar-portlet bordered"> 
+        <!-- SIDEBAR USERPIC --> 
+        <div class="profile-userpic"> 
+         <img src="https://img.soaer.com/pages/media/profile/sunny.jpg" class="img-responsive" alt=""> 
+        </div> 
+        <!-- 博客作者名称 --> 
+        <div class="profile-usertitle"> 
+         <div class="profile-usertitle-name">
+          Sunny
+         </div> 
+        </div> 
+       </div> 
+       <div id="ad"> 
+        <!-- <img  width="100%" src="http://f12.baidu.com/it/u=292560263,2120845313&fm=76"> --> 
+       </div> 
+       <br> 
+       <div class="portlet light bordered"> 
+        <div> 
+         <!-- 阅读次数 --> 
+         <div class="margin-top-10 profile-desc-link" id="blogReadNum"></div> 
+         <!-- 创建时间 --> 
+         <div class="margin-top-10 profile-desc-link" id="blogCreateDate">
+          创建日期：2018年8月13日
+         </div> 
+        </div> 
+        <br> 
+        <div id="lastBlogList"> 
+         <h4 class="profile-desc-title">最近发表的文章</h4> 
+         <!-- <span class="profile-desc-text"> Lorem ipsum dolor sit amet diam nonummy nibh dolore. </span> --> 
+         <!-- 最新发表的博客列表 --> 
+        </div> 
+       </div> 
+       <!-- END PORTLET MAIN --> 
+      </div> 
+     </ul> 
+     <!-- END SIDEBAR MENU --> 
+    </div> 
+    <!-- END SIDEBAR --> 
+   </div> 
+   <!-- END SIDEBAR --> 
+   <!-- BEGIN CONTENT --> 
+   <!-- END QUICK SIDEBAR --> 
+   <div class="page-content-wrapper"> 
+    <div class="page-content"> 
+     <div class="page-head"> 
+      <!-- BEGIN PAGE TITLE --> 
+      <!-- 博客标题 --> 
+      <div id="page-title"> 
+       <h1>OpenResty&nbsp; 入门开发篇（四）-火焰图优化性能</h1> 
+      </div> 
+      <!-- END PAGE TITLE --> 
+      <!-- BEGIN PAGE TOOLBAR --> 
+      <!-- END PAGE TOOLBAR --> 
+     </div> 
+     <br> 
+     <!-- 博客标签列表 --> 
+     <div class="noteAd">
+      <a href="javascript:;" class="btn btn-circle red disabled">原创</a>
+      <a href="javascript:;" class="btn btn-circle green disabled">标签</a>
+      <a href="javascript:;" class="btn btn-circle green">OpenResty</a>
+      <a href="javascript:;" class="btn btn-circle green">火焰图</a>
+      <a href="javascript:;" class="btn btn-circle green">性能调优</a>
+      <a href="javascript:;" class="btn btn-circle green">systemTap</a>
+     </div> 
+     <h2>说明</h2> 
+     <pre><code>此篇文章主要针对OpenResty中根据火焰图做性能调优。火焰图主要用于显示CPU的调用栈，x 轴表示抽样数，如果一个函数在 x 轴占据的宽度越宽，就表示它被抽到的次数多，即执行的时间长，y 轴表示调用栈，每一层都是一个函数。调用栈越深，火焰就越高，顶部就是正在执行的函数，下方都是它的父函数。注意，x 轴不代表时间，而是所有的调用栈合并后。此篇文档也是记录下相关操作，以及相关经验。
+</code></pre> 
+     <h2>需要安装systemTap</h2> 
+     <pre><code>sudo apt-get install elfutils
+sudo apt-get install  libcap-dev
+sudo apt-get install systemtap
+</code></pre> 
+     <h2>下载对应的kernel debug info包</h2> 
+     <h3>查看kernel版本</h3> 
+     <pre><code>****@ubuntu:~$ uname -r
+4.4.0-130-generic
+</code></pre> 
+     <h3>找到对应的debug info包</h3> 
+     <pre><code>打开下面地址找到自己kernel版本所对应的包信息。
+http://ddebs.ubuntu.com/pool/main/l/linux/
+</code></pre> 
+     <p><img src="https://img.soaer.com/blog/47.png" alt="" referrerPolicy="no-referrer"></p> 
+     <h2>安装debug info包</h2> 
+     <pre><code>sudo dpkg -i linux-image-4.4.0-130-generic-dbgsym_4.4.0-130.156_i386.ddeb
+</code></pre> 
+     <h2>测试</h2> 
+     <pre><code>****@ubuntu:~$ sudo stap -ve 'probe begin { log("hello world") exit() }'
+[sudo] password for ****: 
+Pass 1: parsed user script and 113 library scripts using 68608virt/37912res/5072shr/33120data kb, in 80usr/0sys/95real ms.
+Pass 2: analyzed script: 1 probe, 2 functions, 0 embeds, 0 globals using 69268virt/39120res/5516shr/33780data kb, in 10usr/0sys/4real ms.
+Pass 3: using cached /home/****/.systemtap/cache/6e/stap_6ef108742a1cf68c5f96d4ee1c0fa266_1104.c
+Pass 4: using cached /home/****/.systemtap/cache/6e/stap_6ef108742a1cf68c5f96d4ee1c0fa266_1104.ko
+Pass 5: starting run.
+hello world
+Pass 5: run completed in 0usr/10sys/384real ms.
+</code></pre> 
+     <h2>GitHub项目克隆</h2> 
+     <pre><code>git clone https://github.com/openresty/openresty-systemtap-toolkit.git
+git clone https://github.com/brendangregg/FlameGraph.git
+
+可以看下https://github.com/openresty/openresty-systemtap-toolkit.git项目说明文档。其中
+https://github.com/openresty/openresty-systemtap-toolkit#ngx-sample-bt是针对C级别函数，
+https://github.com/openresty/openresty-systemtap-toolkit#ngx-sample-lua-bt是针对lua级别的函数打印。依情况可以选择。
+</code></pre> 
+     <h2>OpenResty调优实战</h2> 
+     <pre><code>启动openresty后，可以看到work process和master process的pid。
+
+备注：其中64696是work process的pid, 不要写master的pid
+
+&gt;&gt;&gt;&gt;&gt;openresty-systemtap-toolkit.git
+****@ubuntu:~/openresty-systemtap-toolkit$ sudo ./sample-bt -p 64696 -t 10 -u &gt; ~/nx_server.bt
+symbolmap: 00000001: invalid section
+WARNING: Tracing 64696 (/home/****/openresty-1.11.2.1/nginx/sbin/nginx) in user-space only...
+WARNING: Missing unwind data for a module, rerun with 'stap -d (unknown; retry with -DDEBUG_UNWIND)'
+WARNING: no or bad debug frame hdr
+WARNING: No binary search table for eh frame, doing slow linear search for stap_9c06a36d86727c27ca7267a58004402_66293
+WARNING: Missing unwind data for a module, rerun with 'stap -d kernel'
+WARNING: Time's up. Quitting now...(it may take a while)
+WARNING: Number of errors: 0, skipped probes: 13
+</code></pre> 
+     <pre><code>&gt;&gt;&gt;&gt;&gt;FlameGraph.git
+./stackcollapse-stap.pl ~/nx_server.bt &gt; ~/nx_server.cbt
+./flamegraph.pl ~/nx_server.cbt &gt; ~/nx_server.svg
+</code></pre> 
+     <p><img src="https://img.soaer.com/blog/48.png" alt="" referrerPolicy="no-referrer"></p> 
+     <h2>调优说明</h2> 
+     <pre><code>再次说明下x轴和y轴的含义：
+x 轴表示抽样数，如果一个函数在 x 轴占据的宽度越宽，就表示它被抽到的次数多，即执行的时间长，y 轴表示调用栈，每一层都是一个函数。调用栈越深，火焰就越高，顶部就是正在执行的函数，下方都是它的父函数。注意，x 轴不代表时间，而是所有的调用栈合并后。特别注意后者说需要特别对待的就是火焰图的平定的函数。以便针对性的调优。
+
+由于做的广告的相关投放，后端会有很多的广告投放系统，甚至十几个二十几个，通过火焰图进行调优的方面一个是json的序列化问题（大部分json序列化性能都不是很好），另一个是DNS解析问题，json问题可以通过缓存部分对象而不是每次都需要序列化来进行调优，DNS解析可以通过定时解析缓存域名和IP的对应关系来调优。
+</code></pre> 
+     <p>&nbsp;</p>  
+     <!-- --------------------MarkDown文件去也--------------------------- --> 
+     <!-- --------------------------------------------------------- --> 
+     <br> 
+     <div class="note note-info"> 
+      <div align="left"> 
+       <a href="javascript:;" class="btn btn-circle green disabled">上一篇</a>&nbsp;&nbsp; 
+       <a href="https://blog.soaer.com/1/fd6f0791a6cf4e9cb736106a895bae44.html" id="recommended1">Elasticsearch源码阅读(三) 节点的选举</a> 
+      </div> 
+      <br> 
+      <div align="left"> 
+       <a href="javascript:;" class="btn btn-circle green disabled">下一篇</a>&nbsp;&nbsp; 
+       <a href="" id="recommended2">没有了</a> 
+      </div> 
+     </div> 
+     <!-- 评论区 --> 
+     <div class="row"> 
+      <div class="col-md-12"> 
+       <!-- BEGIN TODO SIDEBAR --> 
+       <div class="todo-ui"> 
+        <!-- END TODO SIDEBAR --> 
+        <!-- BEGIN TODO CONTENT --> 
+        <div class="todo-content"> 
+         <div class="portlet light bordered"> 
+          <!-- PROJECT HEAD --> 
+          <!-- end PROJECT HEAD --> 
+          <div class="portlet-body"> 
+           <div class="row"> 
+            <div class="todo-tasklist-devider"></div> 
+            <div class="col-md-12 col-sm-8"> 
+             <form class="form-horizontal" id="addComments"> 
+              <!-- TASK HEAD --> 
+              <div class="form"> 
+               <div class="form-group"> 
+                <div class="col-md-8 col-sm-8"> 
+                 <div class="todo-taskbody-user"> 
+                  <span class="todo-username pull-left" id="commentsName"></span> 
+                 </div> 
+                </div> 
+               </div> 
+               <!-- TASK DESC --> 
+               <div class="form-group"> 
+                <div class="col-md-12"> 
+                 <textarea class="form-control todo-taskbody-taskdesc" rows="8" placeholder="文明上网" name="content" id="commentsContent"></textarea> 
+                </div> 
+               </div> 
+               <div id="sendCommentsErrorMessage"></div> 
+               <div class="form-actions right todo-form-actions"> 
+                <input type="button" class="btn btn-circle btn-sm green" id="ac" value="提交"> 
+               </div> 
+              </div> 
+             </form> 
+             <form class="form-horizontal" id="sendEmail" style="display: none;"> 
+              <!-- TASK HEAD  style="display:none;" --> 
+              <div class="form"> 
+               <div class="form-group"> 
+                <div class="col-md-12"> 
+                 <textarea class="form-control todo-taskbody-taskdesc" rows="1" name="email" id="sendMailContent" placeholder="邮箱验证，请输入邮箱号"></textarea> 
+                </div> 
+               </div> 
+               <div class="form-actions right todo-form-actions"> 
+                <input type="button" class="btn btn-circle btn-sm green" id="sdm" value="发送"> 
+               </div> 
+              </div> 
+              <div id="sendEmailErrorMessage"></div> 
+             </form> 
+             <form class="form-horizontal" id="validationEmail" style="display: none;"> 
+              <!-- TASK HEAD  style="display:none;" --> 
+              <div class="form"> 
+               <div class="form-group"> 
+                <div class="col-md-12"> 
+                 <textarea class="form-control todo-taskbody-taskdesc" rows="3" name="cid" placeholder="请输入邮箱里面的内容，验证一次再次评论无需验证"></textarea> 
+                </div> 
+               </div> 
+               <div class="form-actions right todo-form-actions"> 
+                <input type="button" class="btn btn-circle btn-sm green" id="vm" value="验证"> 
+               </div> 
+               <div id="validationEmailErrorMessage"></div> 
+              </div> 
+             </form> 
+             <div class="tabbable-line"> 
+              <div class="tab-content"> 
+               <div class="tab-pane active" id="tab_1"> 
+                <!-- TASK COMMENTS --> 
+                <div class="form-group"> 
+                 <div class="col-md-12"> 
+                  <ul class="media-list" id="commentsList"> 
+                   <!-- 单个评论区 --> 
+                   <!-- 单个评论区结束 --> 
+                  </ul> 
+                 </div> 
+                </div> 
+               </div> 
+              </div> 
+             </div> 
+            </div> 
+           </div> 
+          </div> 
+         </div> 
+        </div> 
+        <!-- END TODO CONTENT --> 
+       </div> 
+      </div> 
+      <!-- END PAGE CONTENT--> 
+     </div> 
+    </div> 
+   </div> 
+  </div> 
+  <script src="https://js.soaer.com/global/plugins/jquery.min.js" type="text/javascript"></script> 
+  <script src="https://js.soaer.com/global/plugins/jquery-cookiebar/jquery.cookieBar.min.js" type="text/javascript"></script> 
+  <script src="https://js.soaer.com/global/plugins/bootstrap/js/bootstrap.min.js" type="text/javascript"></script> 
+  <script src="https://js.soaer.com/global/plugins/js.cookie.min.js" type="text/javascript"></script> 
+  <script src="https://js.soaer.com/global/plugins/jquery-slimscroll/jquery.slimscroll.min.js" type="text/javascript"></script> 
+  <script src="https://js.soaer.com/global/plugins/jquery.blockui.min.js" type="text/javascript"></script> 
+  <script src="https://js.soaer.com/global/plugins/bootstrap-switch/js/bootstrap-switch.min.js" type="text/javascript"></script> 
+  <script src="https://js.soaer.com/global/scripts/app.min.js" type="text/javascript"></script> 
+  <script src="https://js.soaer.com/layouts/layout4/scripts/layout.min.js" type="text/javascript"></script> 
+  <script src="https://js.soaer.com/global/plugins/jquery.base64.js" type="text/javascript"></script> 
+  <script src="https://js.soaer.com/layouts/global/scripts/quick-sidebar.min.js" type="text/javascript"></script> 
+  <script src="https://js.soaer.com/global/plugins/js.cookie.min.js" type="text/javascript"></script> 
+  <script src="https://js.soaer.com/layouts/global/scripts/quick-nav.min.js" type="text/javascript"></script> 
+  <script src="https://js.soaer.com/operate/blog.min.js" type="text/javascript"></script>   
+ </body>
+</html>
